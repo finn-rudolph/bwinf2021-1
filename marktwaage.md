@@ -2,39 +2,21 @@
 
 ## Lösungsidee
 
-Bei dieser Aufgabe ist es schwierig, von einem Zielgewicht ausgehend eine passende Kombination zu finden. Das liegt daran, dass man keinen sinnvollen Einstiegspunkt hat, wie z.B. beim Schiebeparkplatz, bei dem man sinnvollerweise von einem Auto ausgehen kann. Außerdem sind auch Informationen über nicht passende Gewichtskombinationen wertvoll.
+Bei dieser Aufgabe ist es nötig, nahezu alle möglichen Kombinationen an Gewichten zu berechnen, die im Bereich 10 - 10000 liegen, da auch nicht genau passende berücksichtigt werden sollen. 
 
-Daher habe ich mich entschieden, einfach alle Kombinationsmöglichkeiten zu errechnen und dann nach
-
-1. Wertebereich (10 bis 10 000)
-2. genau passend oder am nähsten liegend
-
-zu filtern.
+Zuerst gehe ich davon aus, dass das Ausgleichen von 0 in jedem Fall möglich ist, indem man kein Gewicht auf die Waage stellt. Wenn man also von einem Zielgewicht ausgehend durch Addition und Subtraktion von vorhandenen Gewichten 0 erreicht, bevor alle Gewichte aufgebraucht sind, ist das Zielgewicht erreichbar.
 
 ## Umsetzung
 
-In dieser Aufgabe wird hauptsächlich mit **Listen** gearbeitet, da die Kombinationsmöglichkeiten keine Beziehung zueinander haben.
+Dieses Konzept setze ich mithilfe einer rekursiven Funktion um, die ein Gewicht addiert / subtrahiert und dann sich selbst mit dem Ergebnis neu aufruft. 
 
-- `numbers`: Liste aller Zahlen von 10 bis 10 000
-
-- `weights`: Liste aller Gewichte
-
-  &rarr; Mehrfache werden mehrfach abgespeichert.
-
-- `possible`: Liste aller Kombinationsmöglichkeiten
-
-  &rarr; alle möglichen Abfolgen von Gewichten + Vorzeichen bei unterschiedlich vielen Gewichten
-
-Die Kombinationen werden in folgender Struktur in `possible` abgespeichert:
-
-```typescript
-type weightCombination = {
-	sum: number,
-    left: Array<number>,
-    right: Array<number>
-}
-```
-
-Unter `right` stehen alle addierten Elemente, unter `left` alle subtrahierten.
+Falls 0 herauskommt oder alle Gewichte aufgebraucht sind, wird ein Objekt zurückgegeben, das Informationen über den Abstand zum Zielgewicht sowie die verwendeten Gewichte enthält. Die Differenz zum Zielgewicht sollte möglichst klein sein, bestenfalls 0. Daher werden von der aufrufenden Funktion alle zurückgegebenen Objekte hinsichtlich ihrer Differenz verglichen&rarr; das mit dem kleinsten Betrag wird weitergegeben.
 
 ## Beispiele
+
+## Quellcode
+
+### Datentypen
+
+### Funktionen
+
