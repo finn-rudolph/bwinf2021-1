@@ -2,7 +2,7 @@ import { weightCombination, weightMemo } from "./types.ts";
 
 export const calculateNearest = (
 	target: number,
-	weights: Array<number>,
+	usableWeights: Array<number>,
 	memo: weightMemo = {},
 	usedWeights: Array<number> = []
 ): weightCombination => {
@@ -11,24 +11,24 @@ export const calculateNearest = (
 			diff: 0,
 			usedWeights: usedWeights
 		};
-	if (weights.length === 0)
+	if (usableWeights.length === 0)
 		return {
 			diff: target,
 			usedWeights: usedWeights
 		};
 
-	const memoKey = `${target}:${weights.toString()}`;
-	if (memoKey in memo) return memo[`${target}:${weights.toString()}`];
+	const memoKey = `${target}:${usableWeights.toString()}`;
+	if (memoKey in memo) return memo[`${target}:${usableWeights.toString()}`];
 
 	let bestCombination: weightCombination = {
 		diff: target,
 		usedWeights: []
 	};
 
-	for (const weight of weights) {
+	for (const weight of usableWeights) {
 		// Make a true copy, not only a reference copy
-		const shortenedWeights = [...weights];
-		shortenedWeights.splice(weights.indexOf(weight), 1);
+		const shortenedWeights = [...usableWeights];
+		shortenedWeights.splice(usableWeights.indexOf(weight), 1);
 
 		let added: weightCombination = {
 			diff: target,
