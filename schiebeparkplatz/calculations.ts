@@ -76,3 +76,46 @@ const convertOutput = (
 
 	return shiftInstructions;
 };
+
+export const locateObstructing = (
+	carIndex: number,
+	horizontalCars: Array<horizontalCar>
+): horizontalCar | undefined => {
+	for (let i = 0; horizontalCars[i].position - 1 < carIndex; i++) {
+		if (
+			(horizontalCars[i].position === carIndex ||
+				horizontalCars[i].position + 1 === carIndex) &&
+			horizontalCars[i].name !== "wall"
+		)
+			return horizontalCars[i];
+	}
+	return undefined;
+};
+
+/* Criteria:
+	1. existence
+	2. fewest cars shifted
+	3. fewest positions shifted
+*/
+export const determineBest = (
+	shiftStepsLeft: Array<shiftStep> | undefined,
+	shiftStepsRight: Array<shiftStep> | undefined
+): Array<shiftStep> | undefined => {
+	return shiftStepsLeft === undefined
+		? shiftStepsRight
+		: shiftStepsRight === undefined
+		? shiftStepsLeft
+		: shiftStepsLeft.length === shiftStepsRight.length &&
+		  shiftStepsLeft.length !== 0
+		? shiftStepsLeft
+				.map((step) => step.positions)
+				.reduce((acc, current) => acc + current) <
+		  shiftStepsRight
+				.map((step) => step.positions)
+				.reduce((acc, current) => acc + current)
+			? shiftStepsLeft
+			: shiftStepsRight
+		: shiftStepsLeft.length < shiftStepsRight.length
+		? shiftStepsLeft
+		: shiftStepsRight;
+};
