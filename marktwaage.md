@@ -6,6 +6,29 @@ Bei dieser Aufgabe ist es nötig, nahezu alle möglichen Kombinationen an Gewich
 
 Zuerst gehe ich davon aus, dass das Ausgleichen von 0 in jedem Fall möglich ist, indem man kein Gewicht auf die Waage stellt. Wenn also von einem Zielgewicht ausgehend durch Addition und Subtraktion von vorhandenen Gewichten 0 erreicht wird, bevor alle Gewichte aufgebraucht sind, ist das Zielgewicht ausgleichbar.
 
+Beispiel (Zielgewicht: 30g; Gewichte: 10g, 20g):
+
+```mermaid
+flowchart TB
+
+1((30g)) -->|+10| 21((40g))
+1 -->|-10| 22((20g))
+1 -->|+20| 23((50g))
+1 -->|-20| 24((10g))
+
+21 -->|+20| 31((60g))
+21 -->|-20| 32((20g))
+
+22 -->|+20| 33((40g))
+22 -->|-20| 34[0g]
+
+23 -->|+10| 35((60g))
+23 -->|-10| 36((40g))
+
+24 -->|+10| 37((20g))
+24 -->|-10| 38[0g]
+```
+
 ## Umsetzung
 
 Dieses Konzept setze ich durch eine rekursive Funktion in [Typescript](https://www.typescriptlang.org/) mit der Laufzeit [Deno](https://deno.land/) um. Ich schreibe auf Englisch, damit ich Teile des Codes in anderen Projekten wiederverwenden kann, in denen Englisch meist Standard ist.
@@ -30,7 +53,7 @@ Falls nach Austesten aller Gewichte keine passende Lösung gefunden wurde, wird 
 
 ### Laufzeitverbesserungen
 
-Sicher ist Ihnen aufgefallen, dass ich einige Abschnitte bis jetzt nicht behandelt habe (z.B. Z. 18-19, 42, 51). Die Funktion würde auch ohne sie richtig arbeiten, allerdings sehr ineffizient aufgrund exponentieller Zeitkomplexität. Daher habe ich (neben frühzeitiger Rückgabe) zwei Maßnahmen zum Umgehen irrelevanter Berechnungen eingebaut.
+Sicher ist Ihnen aufgefallen, dass ich einige Abschnitte bis jetzt nicht behandelt habe (z.B. Z. 18-19, 42, 51). Die Funktion würde auch ohne sie richtig arbeiten, allerdings sehr ineffizient (exponentielle Zeitkomplexität). Daher habe ich (neben frühzeitiger Rückgabe) zwei Maßnahmen zum Umgehen irrelevanter Berechnungen eingebaut.
 
 1. Memoisation (Zwischenspeicherung) von Teillösungen
 2. keine Addition und Subtraktion der gleichen Gewichtsklasse
