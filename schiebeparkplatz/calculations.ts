@@ -1,7 +1,7 @@
 import { horizontalCar, shiftStep } from "./types.ts";
 import { alphabet } from "./alphabet.ts";
 
-const shiftHorizontal = (
+export const shiftHorizontal = (
 	minShifts: number,
 	direction: number, // -1: left, 1: right
 	currentCar: horizontalCar,
@@ -15,7 +15,8 @@ const shiftHorizontal = (
 
 	const distance =
 		direction === -1
-			? currentCar.position - (nextCar.position + 2)
+			? currentCar.position -
+			  (nextCar.position + (nextCar.name === "wall" ? 1 : 2))
 			: nextCar.position - (currentCar.position + 2);
 
 	const furtherShifts = shiftHorizontal(
@@ -36,7 +37,7 @@ const shiftHorizontal = (
 	return [...furtherShifts, currentShift];
 };
 
-const convertInput = async (
+export const convertInput = async (
 	path: string
 ): Promise<[Array<string>, Array<horizontalCar>]> => {
 	const textFile = await Deno.readTextFile(path);
@@ -57,14 +58,24 @@ const convertInput = async (
 		}
 	);
 
-	return [verticalCars, horizontalCars];
+	return [
+		verticalCars,
+		[
+			{ name: "wall", position: -1 },
+			...horizontalCars,
+			{ name: "wall", position: verticalCars.length }
+		]
+	];
 };
 
-const convertOutput = (
+export const convertOutput = (
 	verticalCar: string,
-	steps: Array<shiftStep>
+	steps: Array<shiftStep> | undefined
 ): string => {
 	let shiftInstructions = `${verticalCar}:`;
+
+	if (steps === undefined)
+		return shiftInstructions + " Ausparken nicht möglich";
 
 	// No Comma for the first shift --> control variable i needed --> classic for-loop
 	for (let i = 0; i < steps.length; i++) {
