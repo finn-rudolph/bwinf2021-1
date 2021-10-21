@@ -2,7 +2,9 @@
 
 ## Lösungsidee
 
-In einer Liste der Länge aller Hotels wird für jedes Hotel eine Liste aller Möglichkeiten, es zu erreichen, abgespeichert. Die Liste an Hotels, um das aktuelle zu erreichen, ergänzt um das aktuelle Hotel, wird dafür der Liste an Möglichkeiten aller Hotels innerhalb der nächsten 360 Minuten hinzugefügt. Schließlich wird die beste Fahrtmöglichkeit durch Vergleich aller Möglichkeiten am Ziel ermittelt.
+Zuerst sollen alle Hotels mit einer besseren Alternative bei gleicher Minutenzahl aussortiert werden. Das hat zwei Vorteile: Ein Hotel kann allein durch die Minutenzahl eindeutig identifiziert werden und es wird von vornherein unnötiger Rechenaufwand vermieden.
+
+In einer Liste der Länge aller Hotels wird für jedes Hotel eine Liste aller Möglichkeiten, es zu erreichen, abgespeichert. Zunächst werden alle vom Start erreichbaren Hotels mit einem Seedwert von `[[]]` initialisiert, was bedeutet, dass eine Möglichkeit vorhanden ist, das Hotel zu erreichen und keine Hotels dafür benötigt werden. Die Liste an Hotels, um das aktuelle zu erreichen, ergänzt um das aktuelle Hotel, wird dann der Liste an Möglichkeiten aller Hotels innerhalb der nächsten 360 Minuten hinzugefügt. Schließlich wird die beste Fahrtmöglichkeit durch Vergleich aller Möglichkeiten am Ziel ermittelt.
 
 Beispiel:
 
@@ -10,47 +12,45 @@ Beispiel:
 flowchart LR
 
 
-s(Start)---h1(20min, 3.5*)---h2(300 min, 4.0*)---h3(540min, 4.8*)---z(600 min)
+s(Start)---h1(20min, 3.5*)---h2(300 min, 4.0*)---h3(540min, 4.8*)---z(Ziel: 600 min)
 
-subgraph Hotel1
+s -->|Seed| m1
+s -->|Seed| m2
+
 h1
-m1("[ ]")
-end
-s --> m1
+m1("[ [ ] ]")
+m1 --> m2 --> m3 --> m4
 
-subgraph Hotel2
+m2 --> m4
+
+
 h2
-m2("[ ]")
-m3("[ { 20min, 3.5* } ]")
-end
-s --> m2
-m1 --> m3
+m2("[ [ ],
+[ { 20min, 3.5* } ] ]")
 
-subgraph Hotel3
 h3
 
-m5("[ { 20min, 3.5* }, 
-{ 300min, 4.0* } ]")
-m6("[ { 300min, 4.0* } ]")
-end
-m3 --> m5
-m2 --> m6
+m3("[ [ { 20min, 3.5* },
+{ 300min, 4.0* } ],
 
-subgraph Ziel
-z
-m7("[ { 20min, 3.5* }, 
+[ { 300min, 4.0* } ] ]")
+
+m4("[ [ { 20min, 3.5* },
 { 300min, 4.0* },
-{ 540min, 4.8* } ]")
-m8("[ { 300min, 4.0* },
-{540min, 4.8*}]")
-m9("[ { 300min, 4.0* } ]")
-end
-m5 --> m7
-m6 --> m8
-m2 --> m9
+{ 540min, 4.8* } ],
+
+[ { 300min, 4.0* },
+{ 540min, 4.8* } ],
+
+[ { 300min, 4.0* } ],
+
+[ { 20min, 3.5* },
+{ 300min, 4.0* } ] ]")
 ```
 
-Eine Möglichkeit ist jedoch nur zielführend, wenn pro verbleibendem Tag durchschnittlich weniger als 360 Minuten zu fahren sind. &rarr; Andernfalls wird diese Möglichkeit nicht fortgeführt.
+Eine Möglichkeit ist jedoch nur zielführend, wenn pro verbleibendem Tag durchschnittlich weniger als 360 Minuten zu fahren sind. &rarr; Andernfalls wird diese Möglichkeit nicht fortgeführt. 
+
+Ebenso sind alle Hotels, die eine schlechtere Bewertung als das maximal erreichbare außer Acht zu lassen, da sie zwangsläufig nicht die beste Möglichkeit sind.
 
 ## Umsetzung
 
