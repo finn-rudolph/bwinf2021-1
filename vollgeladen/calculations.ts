@@ -75,8 +75,8 @@ export const convertInput = async (
 	return [Number(travelTime), hotels];
 };
 
-export const convertOutput = (travelRoute: Array<hotelInformation>): string => {
-	return travelRoute
+export const convertOutput = (travelRoute: Array<hotelInformation>): string =>
+	travelRoute
 		.map((hotel) => `${hotel.timestamp}	|	${hotel.rating}`)
 		.reduce(
 			(acc, hotel) =>
@@ -85,4 +85,38 @@ export const convertOutput = (travelRoute: Array<hotelInformation>): string => {
 			`	Minute 	|	Bewertung
 	-------------------------`
 		);
-};
+
+export const filterHotels = (
+	travelTime: number,
+	hotels: Array<hotelInformation>
+): Array<hotelInformation> =>
+	hotels.filter((hotel, index) => {
+		if (hotel.timestamp > travelTime) return false;
+		if (
+			(hotels[index + 1] !== undefined
+				? hotel.timestamp !== hotels[index + 1].timestamp
+				: true) &&
+			(hotels[index - 1] !== undefined
+				? hotel.timestamp !== hotels[index - 1].timestamp
+				: true)
+		)
+			return true;
+
+		for (
+			let d = 0; // d: delta
+			hotels[index + d] &&
+			hotels[index + d].timestamp === hotel.timestamp;
+			d++
+		) {
+			if (hotel.rating < hotels[index + d].rating) return false;
+		}
+		for (
+			let d = 0;
+			hotels[index - d] !== undefined &&
+			hotels[index - d].timestamp === hotel.timestamp;
+			d++
+		) {
+			if (hotel.rating < hotels[index - d].rating) return false;
+		}
+		return true;
+	});
