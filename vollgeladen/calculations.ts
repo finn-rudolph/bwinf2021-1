@@ -3,7 +3,7 @@ import { hotelInformation } from "./types.ts";
 export const bestTravelRoute = (
 	travelTime: number,
 	hotels: Array<hotelInformation>
-): Array<Array<hotelInformation>> => {
+): Array<hotelInformation> => {
 	hotels = [...hotels, { timestamp: travelTime, rating: 5 }];
 	const hotelsTable: Array<Array<Array<hotelInformation>>> = [
 		// map() as independent Array instances are needed
@@ -32,5 +32,57 @@ export const bestTravelRoute = (
 			}
 		}
 	}
-	return hotelsTable[hotelsTable.length - 1];
+	return determineBest(hotelsTable[hotelsTable.length - 1]);
+};
+
+export const determineBest = (
+	possibleRoutes: Array<Array<hotelInformation>>
+): Array<hotelInformation> => {
+	const worstRatings = possibleRoutes.map((route) => {
+		return route
+			.map((hotel) => hotel.rating)
+			.reduce((worstRating, currentRating) =>
+				currentRating < worstRating ? currentRating : worstRating
+			);
+	});
+
+	const bestIndex = worstRatings.reduce(
+		(bestIndex, currentRating, currentIndex) =>
+			currentRating > worstRatings[bestIndex] ? currentIndex : bestIndex,
+		0
+	);
+
+	return possibleRoutes[bestIndex];
+};
+
+export const convertInput = async (
+	path: string
+): Promise<[travelTime: number, hotels: Array<hotelInformation>]> => {
+	const textFile = await Deno.readTextFile(path);
+
+	const [_hotelsAmount, travelTime, ...hotelDescriptions] =
+		textFile.split(/\r\n|\n/);
+
+	const hotels: Array<hotelInformation> = hotelDescriptions.map(
+		(hotelDescription) => {
+			const [timestamp, rating] = hotelDescription.split(" ");
+			return {
+				timestamp: Number(timestamp),
+				rating: Number(rating)
+			};
+		}
+	);
+	return [Number(travelTime), hotels];
+};
+
+export const convertOutput = (travelRoute: Array<hotelInformation>): string => {
+	return travelRoute
+		.map((hotel) => `${hotel.timestamp}	|	${hotel.rating}`)
+		.reduce(
+			(acc, hotel) =>
+				(acc = `${acc}
+	${hotel}`),
+			`	Minute 	|	Bewertung
+	-------------------------`
+		);
 };
