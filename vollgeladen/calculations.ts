@@ -1,63 +1,81 @@
-import { hotelInformation } from "./types.ts";
+import { hotelInformation, route } from "./types.ts";
 
 export const bestTravelRoute = (
 	travelTime: number,
 	hotels: Array<hotelInformation>
-): Array<hotelInformation> => {
+): route => {
 	hotels = [...hotels, { timestamp: travelTime, rating: 5 }];
 
-	const hotelsTable: Array<Array<Array<hotelInformation>>> = Array(
-		hotels.length
-	) // map() as independent Array instances are needed
+	const hotelsTable: Array<Array<route>> = Array(hotels.length)
+		// map() as independent Array instances are needed
 		.fill(undefined)
 		.map(() => []);
 
 	// Seed all from start reachable hotels
 	for (let i = 0; hotels[i].timestamp <= 360; i++) {
-		hotelsTable[i] = [[]];
+		const seedRoute: route = { lowestRating: 5, intermediateStops: [] };
+		hotelsTable[i] = [seedRoute];
 	}
 
 	for (let i = 0; i < hotels.length; i++) {
-		let farthestHotelIndex: number = i;
-		for (
-			let d = i + 1;
-			hotels[d] !== undefined &&
-			hotels[d].timestamp <= hotels[i].timestamp + 360;
-			d++
-		) {
-			farthestHotelIndex = d;
-		}
-		const farthestHotel = hotels[farthestHotelIndex];
-
 		for (
 			let j = 1;
 			hotels[i + j] !== undefined &&
 			hotels[i + j].timestamp <= hotels[i].timestamp + 360;
 			j++
 		) {
-			if (hotels[i + j].rating >= farthestHotel.rating) {
-				for (let k = 0; k < hotelsTable[i].length; k++) {
-					if (
-						(travelTime - hotels[i + j].timestamp) /
-							(4 - hotelsTable[i][k].length) <=
-						360
-					)
-						hotelsTable[i + j] = [
-							...hotelsTable[i + j],
-							[...hotelsTable[i][k], hotels[i]]
-						];
-				}
+			for (let k = 0; k < hotelsTable[i].length; k++) {
+				const newRoute: route = {
+					lowestRating:
+						hotels[i].rating < hotelsTable[i][k].lowestRating
+							? hotels[i].rating
+							: hotelsTable[i][k].lowestRating,
+					intermediateStops: [
+						...hotelsTable[i][k].intermediateStops,
+						hotels[i]
+					]
+				};
+
+				if (
+					(travelTime - hotels[i + j].timestamp) /
+						(4 - hotelsTable[i][k].intermediateStops.length) <=
+					360
+				)
+					hotelsTable[i + j] = substituteRoutes(
+						newRoute,
+						hotelsTable[i + j]
+					);
 			}
 		}
 	}
 	return determineBest(hotelsTable[hotelsTable.length - 1]);
 };
 
-export const determineBest = (
-	possibleRoutes: Array<Array<hotelInformation>>
-): Array<hotelInformation> => {
+const substituteRoutes = (
+	route: route,
+	hotelRoutes: Array<route>
+): Array<route> => {
+	for (let i = 0; i < hotelRoutes.length; i++) {
+		if (
+			route.lowestRating < hotelRoutes[i].lowestRating &&
+			route.intermediateStops.length <=
+				hotelRoutes[i].intermediateStops.length
+		)
+			return hotelRoutes;
+	}
+	const filteredRoutes = hotelRoutes.filter(
+		(targetRoute) =>
+			targetRoute.intermediateStops.length <
+				route.intermediateStops.length ||
+			targetRoute.lowestRating > route.lowestRating
+	);
+
+	return [...filteredRoutes, route];
+};
+
+const determineBest = (possibleRoutes: Array<route>): route => {
 	const worstRatings = possibleRoutes.map((route) => {
-		return route
+		return route.intermediateStops
 			.map((hotel) => hotel.rating)
 			.reduce((worstRating, currentRating) =>
 				currentRating < worstRating ? currentRating : worstRating
@@ -93,8 +111,8 @@ export const convertInput = async (
 	return [Number(travelTime), hotels];
 };
 
-export const convertOutput = (travelRoute: Array<hotelInformation>): string =>
-	travelRoute
+export const convertOutput = (travelRoute: route): string =>
+	travelRoute.intermediateStops
 		.map((hotel) => `${hotel.timestamp}	|  ${hotel.rating}`)
 		.reduce(
 			(acc, hotel) =>

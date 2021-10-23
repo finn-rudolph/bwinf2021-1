@@ -2,9 +2,19 @@
 
 ## Lösungsidee
 
-Zuerst sollen alle Hotels mit einer besseren Alternative bei gleicher Minutenzahl aussortiert werden. Das hat zwei Vorteile: Ein Hotel kann allein durch die Minutenzahl eindeutig identifiziert werden und es wird von vornherein unnötiger Rechenaufwand vermieden.
+Zuerst sollen alle Hotels mit einer besseren Alternative bei gleicher Minutenzahl aussortiert werden. Das hat zwei Vorteile: Ein Hotel kann allein durch die Minutenzahl eindeutig identifiziert werden und es wird von vornherein unnötiger Rechenaufwand vermieden. Ebenso sind Hotels nach dem Ziel nicht relevant.
 
-In einer Liste der Länge aller Hotels wird für jedes Hotel eine Liste aller Möglichkeiten, es zu erreichen, abgespeichert. Zunächst werden alle vom Start erreichbaren Hotels mit einem Seedwert von `[[]]` initialisiert, was bedeutet, dass eine Möglichkeit vorhanden ist, das Hotel zu erreichen und keine Hotels dafür benötigt werden. Die Liste an Hotels, um das aktuelle zu erreichen, ergänzt um das aktuelle Hotel, wird dann der Liste an Möglichkeiten aller Hotels innerhalb der nächsten 360 Minuten hinzugefügt. Schließlich wird die beste Fahrtmöglichkeit durch Vergleich aller Möglichkeiten am Ziel ermittelt.
+In einer Liste der Länge aller Hotels wird für jedes Hotel eine Liste aller Möglichkeiten, es zu erreichen, abgespeichert. Zunächst werden alle vom Start erreichbaren Hotels mit einem bestimmten Wert initialisiert, um anzuzeigen, dass eine Möglichkeit vorhanden ist, das Hotel zu erreichen und keine Hotels dafür benötigt werden. Danach wird für jedes Hotel die Liste an Möglichkeiten, es zu erreichen, allen Hotels innerhalb der nächsten 360 Minuten hinzugefügt, nachdem jede Möglichkeit um das Hotel ergänzt worden ist. Das ist nötig, da in diesem Hotel übernachtet werden muss, um die darauffolgenden zu erreichen.
+
+Zwei Einschränkungen gibt es: 
+
+1. Wenn bei dem Zielhotel bereits eine Möglichkeit vorhanden ist, es mit einer höheren kleinsten Bewertung zu erreichen, während die gleiche / geringere Anzahl an Hotels benötigt wird, soll die betreffende Möglichkeit nicht hinzugefügt werden. Andernfalls soll sie alle mit gleich vielen / mehr Zwischenstopps ersetzen, die eine schlechtere / gleiche Bewertung haben. Das bedeutet, es werden pro Hotel maximal 5 Möglichkeiten gleichzeitig existieren.
+
+2. Eine Möglichkeit ist nur zielführend, wenn pro verbleibendem Tag durchschnittlich weniger als 360 Minuten zu fahren sind. 
+
+   &rarr; Andernfalls wird diese Möglichkeit nicht fortgeführt. 
+
+Nachdem das für jedes Hotel geschehen ist, wird die beste Fahrtmöglichkeit durch Vergleich aller Möglichkeiten am Ziel ermittelt.
 
 Beispiel:
 
@@ -19,38 +29,24 @@ s -->|Seed| m2
 
 h1
 m1("[ [ ] ]")
-m1 --> m2 --> m3 --> m4
+m1 -.-> m2 --> m3 -.-> m4
 
 m2 --> m4
 
 
 h2
-m2("[ [ ],
-[ { 20min, 3.5* } ] ]")
+m2("[ [ ] ]")
 
 h3
 
-m3("[ [ { 20min, 3.5* },
-{ 300min, 4.0* } ],
+m3("[ [ { 300min, 4.0* } ] ]")
 
-[ { 300min, 4.0* } ] ]")
-
-m4("[ [ { 20min, 3.5* },
-{ 300min, 4.0* },
-{ 540min, 4.8* } ],
-
-[ { 300min, 4.0* },
-{ 540min, 4.8* } ],
-
-[ { 300min, 4.0* } ],
-
-[ { 20min, 3.5* },
-{ 300min, 4.0* } ] ]")
+m4("[ [ { 300min, 4.0* } ]")
 ```
 
-Eine Möglichkeit ist jedoch nur zielführend, wenn pro verbleibendem Tag durchschnittlich weniger als 360 Minuten zu fahren sind. &rarr; Andernfalls wird diese Möglichkeit nicht fortgeführt. 
 
-Ebenso sind alle Hotels, die eine schlechtere Bewertung als das maximal erreichbare außer Acht zu lassen, da sie zwangsläufig nicht die beste Möglichkeit sind.
+
+*durchgezogen*: Hinzufügen einer Möglichkeit; *gepunktet*: Hinzufügen wäre möglich, allerdings ist bereits eine bessere Möglichkeit vorhanden
 
 ## Umsetzung
 
