@@ -51,6 +51,9 @@ export const bestTravelRoute = (
 	return determineBest(hotelsTable[hotelsTable.length - 1]);
 };
 
+const determineBest = (routes: Array<route>): route =>
+	routes.sort((a, b) => b.lowestRating - a.lowestRating)[0];
+
 const substituteRoutes = (
 	route: route,
 	hotelRoutes: Array<route>
@@ -71,24 +74,6 @@ const substituteRoutes = (
 	);
 
 	return [...filteredRoutes, route];
-};
-
-const determineBest = (possibleRoutes: Array<route>): route => {
-	const worstRatings = possibleRoutes.map((route) => {
-		return route.intermediateStops
-			.map((hotel) => hotel.rating)
-			.reduce((worstRating, currentRating) =>
-				currentRating < worstRating ? currentRating : worstRating
-			);
-	});
-
-	const bestIndex = worstRatings.reduce(
-		(bestIndex, currentRating, currentIndex) =>
-			currentRating > worstRatings[bestIndex] ? currentIndex : bestIndex,
-		0
-	);
-
-	return possibleRoutes[bestIndex];
 };
 
 export const convertInput = async (
