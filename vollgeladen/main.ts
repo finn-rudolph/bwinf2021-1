@@ -5,11 +5,11 @@ import {
 	filterHotels
 } from "./calculations.ts";
 
-const szenarios = 5;
+const szenarios = 7;
 
 for (let i = 0; i < szenarios; i++) {
 	const [travelTime, hotels] = await convertInput(
-		`vollgeladen/beispiele/hotels${i + 1}.txt`
+		`vollgeladen/beispiele/hotels${i}.txt`
 	);
 
 	const filteredHotels = filterHotels(travelTime, hotels);
@@ -18,7 +18,7 @@ for (let i = 0; i < szenarios; i++) {
 
 	const routeDescription = convertOutput(bestRoute);
 
-	console.log(`Hotels ${i + 1}
+	console.log(`Hotels ${i}
 	`);
 	console.log(routeDescription);
 	console.log(`
