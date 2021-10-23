@@ -15,8 +15,7 @@ export const shiftHorizontal = (
 
 	const distance =
 		direction === -1
-			? currentCar.position -
-			  (nextCar.position + (nextCar.name === "wall" ? 1 : 2))
+			? currentCar.position - (nextCar.position + 2)
 			: nextCar.position - (currentCar.position + 2);
 
 	const furtherShifts = shiftHorizontal(
@@ -61,7 +60,7 @@ export const convertInput = async (
 	return [
 		verticalCars,
 		[
-			{ name: "wall", position: -1 },
+			{ name: "wall", position: -2 },
 			...horizontalCars,
 			{ name: "wall", position: verticalCars.length }
 		]
@@ -94,9 +93,8 @@ export const locateObstructing = (
 ): horizontalCar | undefined => {
 	for (let i = 0; horizontalCars[i].position - 1 < carIndex; i++) {
 		if (
-			(horizontalCars[i].position === carIndex ||
-				horizontalCars[i].position + 1 === carIndex) &&
-			horizontalCars[i].name !== "wall"
+			horizontalCars[i].position === carIndex ||
+			horizontalCars[i].position + 1 === carIndex
 		)
 			return horizontalCars[i];
 	}
@@ -112,21 +110,23 @@ export const determineBest = (
 	shiftStepsLeft: Array<shiftStep> | undefined,
 	shiftStepsRight: Array<shiftStep> | undefined
 ): Array<shiftStep> | undefined => {
-	return shiftStepsLeft === undefined
-		? shiftStepsRight
-		: shiftStepsRight === undefined
-		? shiftStepsLeft
-		: shiftStepsLeft.length === shiftStepsRight.length &&
-		  shiftStepsLeft.length !== 0
-		? shiftStepsLeft
-				.map((step) => step.positions)
-				.reduce((acc, current) => acc + current) <
-		  shiftStepsRight
+	if (shiftStepsLeft === undefined) return shiftStepsRight;
+	if (shiftStepsRight === undefined) return shiftStepsLeft;
+
+	if (
+		shiftStepsLeft.length === shiftStepsRight.length &&
+		shiftStepsLeft.length !== 0
+	)
+		return shiftStepsLeft
+			.map((step) => step.positions)
+			.reduce((acc, current) => acc + current) <
+			shiftStepsRight
 				.map((step) => step.positions)
 				.reduce((acc, current) => acc + current)
 			? shiftStepsLeft
-			: shiftStepsRight
-		: shiftStepsLeft.length < shiftStepsRight.length
+			: shiftStepsRight;
+
+	return shiftStepsLeft.length < shiftStepsRight.length
 		? shiftStepsLeft
 		: shiftStepsRight;
 };
