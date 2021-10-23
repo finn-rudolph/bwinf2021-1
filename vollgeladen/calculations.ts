@@ -5,30 +5,48 @@ export const bestTravelRoute = (
 	hotels: Array<hotelInformation>
 ): Array<hotelInformation> => {
 	hotels = [...hotels, { timestamp: travelTime, rating: 5 }];
-	const hotelsTable: Array<Array<Array<hotelInformation>>> = [
-		// map() as independent Array instances are needed
-		...Array(hotels.length)
-			.fill(undefined)
-			.map(() => [])
-	];
+
+	const hotelsTable: Array<Array<Array<hotelInformation>>> = Array(
+		hotels.length
+	) // map() as independent Array instances are needed
+		.fill(undefined)
+		.map(() => []);
 
 	// Seed all from start reachable hotels
 	for (let i = 0; hotels[i].timestamp <= 360; i++) {
 		hotelsTable[i] = [[]];
 	}
 
-	for (let i = 0; i < hotels.length + 1; i++) {
+	for (let i = 0; i < hotels.length; i++) {
+		let farthestHotelIndex: number = i;
+		for (
+			let d = i + 1;
+			hotels[d] !== undefined &&
+			hotels[d].timestamp <= hotels[i].timestamp + 360;
+			d++
+		) {
+			farthestHotelIndex = d;
+		}
+		const farthestHotel = hotels[farthestHotelIndex];
+
 		for (
 			let j = 1;
 			hotels[i + j] !== undefined &&
 			hotels[i + j].timestamp <= hotels[i].timestamp + 360;
 			j++
 		) {
-			for (let k = 0; k < hotelsTable[i].length; k++) {
-				hotelsTable[i + j] = [
-					...hotelsTable[i + j],
-					[...hotelsTable[i][k], hotels[i]]
-				];
+			if (hotels[i + j].rating >= farthestHotel.rating) {
+				for (let k = 0; k < hotelsTable[i].length; k++) {
+					if (
+						(travelTime - hotels[i + j].timestamp) /
+							(4 - hotelsTable[i][k].length) <=
+						360
+					)
+						hotelsTable[i + j] = [
+							...hotelsTable[i + j],
+							[...hotelsTable[i][k], hotels[i]]
+						];
+				}
 			}
 		}
 	}
@@ -77,13 +95,13 @@ export const convertInput = async (
 
 export const convertOutput = (travelRoute: Array<hotelInformation>): string =>
 	travelRoute
-		.map((hotel) => `${hotel.timestamp}	|	${hotel.rating}`)
+		.map((hotel) => `${hotel.timestamp}	|  ${hotel.rating}`)
 		.reduce(
 			(acc, hotel) =>
 				(acc = `${acc}
 	${hotel}`),
-			`	Minute 	|	Bewertung
-	-------------------------`
+			`	Minute 	|  Bewertung
+		|`
 		);
 
 export const filterHotels = (
