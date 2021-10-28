@@ -2,32 +2,70 @@
 
 ## Lösungsidee
 
-Bei dieser Aufgabe ist es nötig, nahezu alle möglichen Kombinationen an Gewichten zu berechnen, die im Bereich 10 - 10000 liegen, da auch nicht genau passende berücksichtigt werden sollen. 
+Bei dieser Aufgabe ist es nötig, nahezu alle möglichen Kombinationen an Gewichten zu berechnen, die im Bereich 10 - 10 000 liegen (teilweise auch darüber hinaus), da auch nicht genau passende berücksichtigt werden sollen.
 
 Zuerst gehe ich davon aus, dass das Ausgleichen von 0 in jedem Fall möglich ist, indem man kein Gewicht auf die Waage stellt. Wenn also von einem Zielgewicht ausgehend durch Addition und Subtraktion von vorhandenen Gewichten 0 erreicht wird, bevor alle Gewichte aufgebraucht sind, ist das Zielgewicht ausgleichbar.
 
-Beispiel (Zielgewicht: 30g; Gewichte: 10g, 20g):
+Allerdings ist es nicht sinnvoll, für ein Gewicht zwei Ausgleichsmöglichkeiten zu berechnen oder *Übergangsgewichte* größer als 10 000 plus das größte Gewicht des Gewichtssatzes. *Übergangsgewichte* nenne ich als Zwischenschritt notwendigerweise berechnete Gewichte, die keine tatsächliche Lösung eines Zielgewichts sind.
+
+Für jedes Ziel- und Übergangsgewicht existiert eine Liste an Gewichtskombinationen, mit denen es erreicht werden kann, falls das möglich ist. Diese Listen werden nach und nach mit Möglichkeiten gefüllt.
+
+Beispiel (Gewichte: 2g, 5g; Zielgewichte 1g - 7g):
 
 ```mermaid
-flowchart TB
+flowchart LR
 
-1((30g)) -->|+10| 21((40g))
-1 -->|-10| 22((20g))
-1 -->|+20| 23((50g))
-1 -->|-20| 24((10g))
+0[0g] --- 1["1g"] --- 2[2g] --- 3[3g] --- 4[4g] --- 5[5g] --- 6[6g] --- 7[7g]
 
-21 -->|+20| 31((60g))
-21 -->|-20| 32((20g))
+subgraph " "
+0
+m0["[ [ ] ]"]
+end
 
-22 -->|+20| 33((40g))
-22 -->|-20| 34[0g]
+subgraph " "
+1
+m1["[ ]"]
+end
 
-23 -->|+10| 35((60g))
-23 -->|-10| 36((40g))
+subgraph " "
+2
+m0 --- m2["[ [ 2 ] ]"]
+end
 
-24 -->|+10| 37((20g))
-24 -->|-10| 38[0g]
+subgraph " "
+3	
+m3["[ [ 5, -2 ] ]"]
+end
+
+m3 --- m5
+
+subgraph " "
+4
+m4["[ ]"]
+end
+
+subgraph " "
+5
+m5["[ [ 5 ] ]"]
+end
+
+
+
+subgraph " "
+6
+m6["[ ]"]
+end
+
+subgraph " "
+7
+m2 --- m7["[ [ 2, 5 ],
+[ 5, 2 ] ]"]
+m5 --- m7
+end
+
 ```
+
+
 
 ## Umsetzung
 
