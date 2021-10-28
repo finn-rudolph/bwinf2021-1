@@ -40,9 +40,10 @@ export const calculateNearest = (
 		};
 
 		// Ensure weights of equal size only to be on one side
+		// 0 <= new target <= 10000 + biggest weight
 
-		if (!usedWeights.includes(weight)) {
-			subtracted = calculateNearest(
+		if (!usedWeights.includes(weight) && target - weight >= 0) {
+			subtracted = nearestCombination(
 				target - weight,
 				shortenedWeights,
 				memo,
@@ -50,11 +51,16 @@ export const calculateNearest = (
 			);
 		}
 
-		if (!usedWeights.includes(-weight)) {
-			added = calculateNearest(target + weight, shortenedWeights, memo, [
-				...usedWeights,
-				weight
-			]);
+		if (
+			!usedWeights.includes(-weight) &&
+			target + weight <= 10000 + usableWeights[usableWeights.length - 1]
+		) {
+			added = nearestCombination(
+				target + weight,
+				shortenedWeights,
+				memo,
+				[...usedWeights, weight]
+			);
 		}
 
 		bestCombination = determineBest([bestCombination, added, subtracted]);
