@@ -1,7 +1,7 @@
 import {
 	convertInput,
 	convertOutput,
-	bestTravelRoute,
+	bestRoute,
 	filterHotels
 } from "./calculations.ts";
 
@@ -14,9 +14,9 @@ for (let i = 0; i < szenarios; i++) {
 
 	const filteredHotels = filterHotels(travelTime, hotels);
 
-	const bestRoute = bestTravelRoute(travelTime, filteredHotels);
+	const route = bestRoute(travelTime, filteredHotels);
 
-	const routeDescription = convertOutput(bestRoute);
+	const routeDescription = convertOutput(route);
 
 	console.log(`Hotels ${i}
 	`);

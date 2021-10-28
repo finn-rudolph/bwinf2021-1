@@ -11,11 +11,12 @@ const szenarios = 6;
 for (let i = 0; i < szenarios; i++) {
 	console.log(`Parkplatz ${i}
 	`);
+
 	const [verticalCars, horizontalCars] = await convertInput(
 		`schiebeparkplatz/beispiele/parkplatz${i}.txt`
 	);
 
-	verticalCars.forEach((verticalCar, carIndex) => {
+	for (let carIndex = 0; carIndex < verticalCars.length; carIndex++) {
 		const obstructingCar = locateObstructing(carIndex, horizontalCars);
 		const shiftStepsLeft =
 			obstructingCar === undefined
@@ -37,9 +38,12 @@ for (let i = 0; i < szenarios; i++) {
 				  );
 
 		const bestShiftSteps = determineBest(shiftStepsLeft, shiftStepsRight);
-		const shiftInstructions = convertOutput(verticalCar, bestShiftSteps);
+		const shiftInstructions = convertOutput(
+			verticalCars[carIndex],
+			bestShiftSteps
+		);
 		console.log(`	${shiftInstructions}`);
-	});
+	}
 
 	console.log(`
 	`);

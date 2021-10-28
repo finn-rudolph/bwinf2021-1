@@ -1,6 +1,6 @@
 import { hotelInformation, route } from "./types.ts";
 
-export const bestTravelRoute = (
+export const bestRoute = (
 	travelTime: number,
 	hotels: Array<hotelInformation>
 ): route => {
@@ -19,31 +19,31 @@ export const bestTravelRoute = (
 
 	for (let i = 0; i < hotels.length; i++) {
 		for (
-			let j = 1;
-			hotels[i + j] !== undefined &&
-			hotels[i + j].timestamp <= hotels[i].timestamp + 360;
-			j++
+			let delta = 1;
+			hotels[i + delta] !== undefined &&
+			hotels[i + delta].timestamp <= hotels[i].timestamp + 360;
+			delta++
 		) {
-			for (let k = 0; k < hotelsTable[i].length; k++) {
+			for (let routeI = 0; routeI < hotelsTable[i].length; routeI++) {
 				const newRoute: route = {
 					lowestRating:
-						hotels[i].rating < hotelsTable[i][k].lowestRating
+						hotels[i].rating < hotelsTable[i][routeI].lowestRating
 							? hotels[i].rating
-							: hotelsTable[i][k].lowestRating,
+							: hotelsTable[i][routeI].lowestRating,
 					intermediateStops: [
-						...hotelsTable[i][k].intermediateStops,
+						...hotelsTable[i][routeI].intermediateStops,
 						hotels[i]
 					]
 				};
 
 				if (
-					(travelTime - hotels[i + j].timestamp) /
-						(4 - hotelsTable[i][k].intermediateStops.length) <=
+					(travelTime - hotels[i + delta].timestamp) /
+						(4 - hotelsTable[i][routeI].intermediateStops.length) <=
 					360
 				)
-					hotelsTable[i + j] = substituteRoutes(
+					hotelsTable[i + delta] = substituteRoutes(
 						newRoute,
-						hotelsTable[i + j]
+						hotelsTable[i + delta]
 					);
 			}
 		}
@@ -113,31 +113,22 @@ export const filterHotels = (
 ): Array<hotelInformation> =>
 	hotels.filter((hotel, index) => {
 		if (hotel.timestamp > travelTime) return false;
-		if (
-			(hotels[index + 1] !== undefined
-				? hotel.timestamp !== hotels[index + 1].timestamp
-				: true) &&
-			(hotels[index - 1] !== undefined
-				? hotel.timestamp !== hotels[index - 1].timestamp
-				: true)
-		)
-			return true;
 
 		for (
-			let d = 0; // d: delta
-			hotels[index + d] &&
-			hotels[index + d].timestamp === hotel.timestamp;
-			d++
+			let delta = 0;
+			hotels[index + delta] !== undefined &&
+			hotels[index + delta].timestamp === hotel.timestamp;
+			delta++
 		) {
-			if (hotel.rating < hotels[index + d].rating) return false;
+			if (hotel.rating < hotels[index + delta].rating) return false;
 		}
 		for (
-			let d = 0;
-			hotels[index - d] !== undefined &&
-			hotels[index - d].timestamp === hotel.timestamp;
-			d++
+			let delta = 0;
+			hotels[index - delta] !== undefined &&
+			hotels[index - delta].timestamp === hotel.timestamp;
+			delta++
 		) {
-			if (hotel.rating < hotels[index - d].rating) return false;
+			if (hotel.rating < hotels[index - delta].rating) return false;
 		}
 		return true;
 	});

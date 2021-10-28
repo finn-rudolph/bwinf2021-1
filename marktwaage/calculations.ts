@@ -1,24 +1,19 @@
 import { weightCombination, weightMemo } from "./types.ts";
 
-export const calculateNearest = (
+export const nearestCombination = (
 	target: number,
 	usableWeights: Array<number>,
 	memo: weightMemo = {},
 	usedWeights: Array<number> = []
 ): weightCombination => {
-	if (target === 0)
-		return {
-			diff: 0,
-			usedWeights: usedWeights
-		};
-	if (usableWeights.length === 0)
+	if (target === 0 || usableWeights.length === 0)
 		return {
 			diff: target,
 			usedWeights: usedWeights
 		};
 
 	const memoKey = `${target}:${usableWeights.toString()}`;
-	if (memoKey in memo) return memo[`${target}:${usableWeights.toString()}`];
+	if (memoKey in memo) return memo[memoKey];
 
 	let bestCombination: weightCombination = {
 		diff: target,
@@ -94,20 +89,20 @@ export const convertInput = async (path: string): Promise<Array<number>> => {
 	const [_weightsAmount, ...weightDescriptions] = textFile.split(/\r\n|\n/);
 
 	// Array.map() is not possible due to different Array lengths
-	let outputWeights: Array<number> = [];
+	let weights: Array<number> = [];
 
 	for (const weightDescription of weightDescriptions) {
 		const [weight, amount] = weightDescription.split(" ");
 
 		for (let i = 0; i < Number(amount); i++) {
-			outputWeights = [...outputWeights, Number(weight)];
+			weights = [...weights, Number(weight)];
 		}
 	}
-	return outputWeights;
+	return weights;
 };
 
 export const convertOutput = (
-	testedWeight: number,
+	target: number,
 	combination: weightCombination
 ): string => {
 	const left = combination.usedWeights.filter((weight) => weight > 0);
@@ -116,13 +111,13 @@ export const convertOutput = (
 		.map((weight) => -weight);
 
 	if (combination.diff === 0) {
-		return `${testedWeight}g: Ausgleich möglich!	
+		return `${target}g: Ausgleich möglich!	
 	Links: ${left.join(", ")}
 	Rechts: ${right.join(", ")}
 	`;
 	}
 
-	return `${testedWeight}g: Ausgleich nicht möglich.
+	return `${target}g: Ausgleich nicht möglich.
 	Differenz: ${combination.diff}
 	Links: ${left.join(", ")}
 	Rechts: ${right.join(", ")}

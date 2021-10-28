@@ -1,18 +1,20 @@
 import {
-	calculateNearest,
+	nearestCombination,
 	convertInput,
 	convertOutput
 } from "./calculations.ts";
 
-const szenarios = 6;
+const szenarios = 7;
 
-for (let i = 0; i < 1; i++) {
-	const inputWeights = await convertInput(
+for (let i = 1; i < szenarios; i++) {
+	const usableWeights = await convertInput(
 		`marktwaage/beispiele/gewichtsstuecke${i}.txt`
 	);
 
-	for (let j = 10; j < 10010; j += 10) {
-		const bestCombination = calculateNearest(j, inputWeights);
-		console.log(convertOutput(j, bestCombination));
+	console.log(`Gewichtssatz ${i}
+	`);
+	for (let target = 10; target < 10010; target += 10) {
+		const bestCombination = nearestCombination(target, usableWeights);
+		console.log(convertOutput(target, bestCombination));
 	}
 }

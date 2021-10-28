@@ -2,12 +2,12 @@ import { horizontalCar, shiftStep } from "./types.ts";
 import { alphabet } from "./alphabet.ts";
 
 export const shiftHorizontal = (
-	minShifts: number,
+	neededShifts: number,
 	direction: number, // -1: left, 1: right
 	currentCar: horizontalCar,
 	horizontalCars: Array<horizontalCar>
 ): Array<shiftStep> | undefined => {
-	if (minShifts <= 0) return [];
+	if (neededShifts <= 0) return [];
 	if (currentCar.name === "wall") return undefined;
 
 	const nextCar =
@@ -19,7 +19,7 @@ export const shiftHorizontal = (
 			: nextCar.position - (currentCar.position + 2);
 
 	const furtherShifts = shiftHorizontal(
-		minShifts - distance,
+		neededShifts - distance,
 		direction,
 		nextCar,
 		horizontalCars
@@ -30,7 +30,7 @@ export const shiftHorizontal = (
 	const currentShift: shiftStep = {
 		carLetter: currentCar.name,
 		direction: direction,
-		positions: minShifts
+		positions: neededShifts
 	};
 
 	return [...furtherShifts, currentShift];
@@ -71,20 +71,18 @@ export const convertOutput = (
 	verticalCar: string,
 	steps: Array<shiftStep> | undefined
 ): string => {
-	let shiftInstructions = `${verticalCar}:`;
+	if (steps === undefined) return verticalCar + ": Ausparken nicht möglich";
 
-	if (steps === undefined)
-		return shiftInstructions + " Ausparken nicht möglich";
+	const shiftInstructions: string = steps
+		.map((step, index) => {
+			const direction = step.direction === -1 ? "links" : "rechts";
+			return index === 0
+				? `: ${step.carLetter} ${step.positions} ${direction}`
+				: `, ${step.carLetter} ${step.positions} ${direction}`;
+		})
+		.join("");
 
-	// No Comma for the first shift --> control variable i needed --> classic for-loop
-	for (let i = 0; i < steps.length; i++) {
-		const direction = steps[i].direction === -1 ? "links" : "rechts";
-		i === 0
-			? (shiftInstructions += ` ${steps[i].carLetter} ${steps[i].positions} ${direction}`)
-			: (shiftInstructions += `, ${steps[i].carLetter} ${steps[i].positions} ${direction}`);
-	}
-
-	return shiftInstructions;
+	return verticalCar + shiftInstructions;
 };
 
 export const locateObstructing = (
