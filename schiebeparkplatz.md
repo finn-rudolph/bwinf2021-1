@@ -54,7 +54,7 @@ Ich schreibe in [Typescript](https://www.typescriptlang.org/) und benutze die La
 
 Ein Parkplatz wird durch `convertInput()` eingelesen, die Anweisungen zum Ausparken durch `convertOutput()` für die Ausgabe im Terminal arrangiert. Da die beiden aber keine Logik zur Bestimmung der Schiebeschritte enthalten, gehe ich nicht näher auf sie ein.
 
-Folgende Schritte werden für jedes vertikale Auto auf einem Parkplatz ausgeführt, ich beschreibe die Schritte für ein Auto.
+Die nötigen Funktionsaufrufe geschehen in `main.ts`, während die Funktionen selbst in `calculations.ts` geschrieben sind. Die im Folgenden beschriebenen Schritte beziehen sich auf ein vertikales Auto, sie werden natürlich für jedes durchgeführt.
 
 ### Bestimmung des blockierenden Autos
 

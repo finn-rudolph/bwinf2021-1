@@ -35,7 +35,7 @@ Dieses Konzept setze ich in [Typescript](https://www.typescriptlang.org/) mit de
 
 Das Einlesen und die Umwandlung der Textdateien sowie die Vorbereitung für die Ausgabe im Terminal übernehmen die zwei Funktionen `convertInput()` und `convertOutput()`, allerdings enthalten sie keine Logik zur Bestimmung passender Gewichte.
 
-Folgende Schritte werden nach dem Einlesen eines Gewichtssatzes für jedes Zielgewicht (10, 20, ..., 10 000) in der Funktion [`nearestCombination()`](###nearestCombination) ausgeführt.
+In `main.ts` werden alle nötigen Funktionen für Zielgewicht (10, 20, ..., 10 000) aufgerufen,  die aber in `calculations.ts` stehen. Folgende Berechnungen gescehen in [`nearestCombination()`](###nearestCombination).
 
 ### Basisfälle
 

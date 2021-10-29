@@ -54,6 +54,8 @@ Ich schreibe in [Typescript](https://www.typescriptlang.org/) und benutze die La
 
 `convertInput()` liest eine Textdatei ein und erstellt daraus die Liste aller Hotels. Die Umwandlug der besten Route in ein gut lesbares Format, das im Terminal ausgegeben werden kann, geschieht durch `convertOutput()`. Diese tragen aber nicht zur Bestimmung der besten Route bei, daher werde ich sie nicht behandeln.
 
+`main.ts` enthält die Aufrufe der in `calculations.ts` geschriebenen Funktionen, die ich im Folgenden beschreibe.
+
 ### Herausfiltern irrelevanter Hotels
 
 Zuerst wird die Liste an Informationen zu jedem Hotel (&rarr; Typ [`hotelInformation`](###type%20hotelInformation) ) durch [`filterHotels()`](###filterHotels()) geschickt. Die Funktion gibt die gleiche Liste an Hotels zurück, jedoch ohne folgende:
