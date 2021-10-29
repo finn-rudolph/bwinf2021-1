@@ -2,15 +2,15 @@
 
 ## Lösungsidee
 
-Zuerst sollen alle Hotels mit einer besseren Alternative bei gleicher Minutenzahl aussortiert werden. Das hat zwei Vorteile: Ein Hotel kann allein durch die Minutenzahl eindeutig identifiziert werden und es wird von vornherein unnötiger Rechenaufwand vermieden. Ebenso sind Hotels nach dem Ziel nicht relevant.
+Zuerst sollen alle Hotels mit einer besseren Alternative bei gleicher Minutenzahl und die hinter dem Ziel aussortiert werden.
 
-In einer Liste der Länge aller Hotels wird für jedes Hotel eine Liste aller Möglichkeiten, es zu erreichen, abgespeichert. Zunächst werden alle vom Start erreichbaren Hotels mit einem bestimmten Wert initialisiert, um anzuzeigen, dass eine Möglichkeit vorhanden ist, das Hotel zu erreichen und keine Hotels dafür benötigt werden. Danach wird für jedes Hotel die Liste an Möglichkeiten, es zu erreichen, allen Hotels innerhalb der nächsten 360 Minuten hinzugefügt, nachdem jede Möglichkeit um das Hotel ergänzt worden ist. Das ist nötig, da in diesem Hotel übernachtet werden muss, um die darauffolgenden zu erreichen.
+In einer Liste wird für jedes Hotel eine Liste aller Möglichkeiten, es zu erreichen, abgespeichert. Daher ergibt sich eine dreidimensionale Liste, weil jede Möglichkeit eine Liste von Hotels ist. Zunächst werden alle vom Start erreichbaren Hotels mit einer leeren zweidimensionalen Liste initialisiert, um anzuzeigen, dass eine Möglichkeit vorhanden ist, das Hotel zu erreichen und keine Hotels dafür benötigt werden. Danach wird für jedes Hotel die Liste an Möglichkeiten, es zu erreichen, allen Hotels innerhalb der nächsten 360 Minuten hinzugefügt. Zuvor wird jede Möglichkeit aber um das aktuelle Hotel ergänzt, weil in diesem Hotel übernachtet werden muss, um die darauffolgenden zu erreichen.
 
 Zwei Einschränkungen gibt es: 
 
 1. Wenn bei dem Zielhotel bereits eine Möglichkeit vorhanden ist, es mit einer höheren kleinsten Bewertung zu erreichen, während die gleiche / geringere Anzahl an Hotels benötigt wird, soll die betreffende Möglichkeit nicht hinzugefügt werden. Andernfalls soll sie alle mit gleich vielen / mehr Zwischenstopps ersetzen, die eine schlechtere / gleiche Bewertung haben. Das bedeutet, es werden pro Hotel maximal 5 Möglichkeiten gleichzeitig existieren.
 
-2. Eine Möglichkeit ist nur zielführend, wenn pro verbleibendem Tag durchschnittlich weniger als 360 Minuten zu fahren sind. 
+2. Eine Reiseroute ist nur zielführend, wenn pro verbleibendem Tag durchschnittlich weniger als 360 Minuten zu fahren sind. 
 
    &rarr; Andernfalls wird diese Möglichkeit nicht fortgeführt. 
 
@@ -52,7 +52,7 @@ m4("[ [ { 300min, 4.0* } ]")
 
 Ich schreibe in [Typescript](https://www.typescriptlang.org/) und benutze die Laufzeit [Deno](https://deno.land/).
 
-Die Textdatei wird von der Funktion `convertInput()` eingelesen, daraus wird eine Liste aller Hotels erstellt. Die Umwandlug der besten Route in ein gut lesbares Format, das im Terminal ausgegeben werden kann, geschieht durch `convertOutput()`. Diese tragen aber nicht zur Bestimmung der besten Route bei, daher werde ich sie nicht behandeln.
+`convertInput()` liest eine Textdatei ein und erstellt daraus die Liste aller Hotels. Die Umwandlug der besten Route in ein gut lesbares Format, das im Terminal ausgegeben werden kann, geschieht durch `convertOutput()`. Diese tragen aber nicht zur Bestimmung der besten Route bei, daher werde ich sie nicht behandeln.
 
 ### Herausfiltern irrelevanter Hotels
 
@@ -72,7 +72,9 @@ Die gefilterte Liste an Hotels wird der Funktion [`bestRoute()`](###bestRoute())
 
 #### Initialisierung der Tabelle
 
-Wie in meiner Idee bereits angedeutet, werde ich mit einer zweidimensionalen Liste arbeiten, um Anfahrtfmöglichkeiten (&rarr; Typ [`route`](###type%20route)) für jedes Hotel abzuspeichern. Daher wird jeder Index der Liste mit einer leeren, *unabhängigen* Liste initialisiert. Allen Hotels, die vom Start erreichbar sind, wird eine Route ohne Zwischenstopps und bestmöglicher niedrigster Bewertung hinzugefügt, da es keine Hotels gibt, die die Bewertung limitieren.
+Die in der Lösungsidee angesprochene dreidimensionale Liste setze ich leicht abgewandelt um, weil es praktisch ist, bei jeder Anfahrtmöglichkeit die limitierende Bewertung sofort griffbereit zu haben. Daher ist die Tabelle selbst nur zweidimensional, allerdings von Typ [`route`](###type%20route), der die Liste an Hotels enthält.
+
+Jeder Index der Liste wird mit einer leeren, *unabhängigen* Liste initialisiert (Z. 7 - 10). Allen Hotels, die vom Start erreichbar sind, wird eine Route ohne Zwischenstopps und bestmöglicher niedrigster Bewertung hinzugefügt, da es keine Hotels gibt, die die Bewertung limitieren (Z. 12 - 16).
 
 Es gibt also nun zwei Listen:
 
@@ -97,11 +99,13 @@ Ob eine Ersetzung der Routen überhaubt in Betracht gezogen wird, hängt davon a
 
 Ist das der Fall, wird die Funktion [`substituteRoutes()`](###substituteRoutes()) aufgerufen, die dafür zuständig ist, falls schlechtere Routen beim Zielhotel vorhanden sind, diese herauszufiltern und *alle* durch die vorgeschlagene `newRoute` zu ersetzen. Zuerst wird geprüft, ob bereits eine bessere Route vorhanden ist, was nach den Kriterien *höhere niedrigste Bewertung* und *weniger Zwischenstopps* geschieht (Z. 6 - 12). Wenn eine bessere Alternative auftritt, wird nichts verändert, andernfalls wird die neue Route *sicherlich hinzugefügt* (Z. 20), weil sie entweder gleichwertig oder besser als die bisher beste ist. Davor werden aber alle schlechteren Routen (gleiche Kriterien wie zuvor) aus der Liste herausgenommen (Z. 13 - 18), damit mit ihnen keine weiteren Routen gebildet werden, die in jedem Fall eine bessere Alternative haben. &rarr; weniger Rechenaufwand
 
-Diese aktualisierte Liste an Routen wird in [`bestRoute()`](###bestRoute()) natürlich dem Zielhotel zugewiesen (Z. 42 - 45).
+Das Zielhotel erhält schleißlich die aktualisierte Liste an Routen in [`bestRoute()`](###bestRoute()) (Z. 42 - 45).
 
 #### Rückgabe
 
-Die Funktion [`determineBest()`](###determineBest()) gibt die Route mit der besten niedrigsten Bewertung zurück, indem sie die Routen zuerst absteigend nach `lowestRating` sortiert und davon das erste Element nimmt. Sie wird auf die Liste an Routen zum Ziel (letztes Element in `hotelsTable`) angewendet, das Ergebnis ist die Rückgabe von [`bestRoute()`](###bestRoute()). &rarr; Ausgabe im Terminal nach Strukturierung durch `convertOutput()`
+Die Funktion [`determineBest()`](###determineBest()) gibt die Route mit der besten niedrigsten Bewertung zurück, indem sie die Routen zuerst absteigend nach `lowestRating` sortiert und davon das erste Element nimmt. Sie wird auf die Liste an Routen zum Ziel (letztes Element in `hotelsTable`) angewendet, das Ergebnis ist die Rückgabe von [`bestRoute()`](###bestRoute()). 
+
+&rarr; Ausgabe im Terminal nach Strukturierung durch `convertOutput()`
 
 ## Beispiele
 
