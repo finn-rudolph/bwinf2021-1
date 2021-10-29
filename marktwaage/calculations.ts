@@ -25,40 +25,35 @@ export const nearestCombination = (
 		const shortenedWeights = [...usableWeights];
 		shortenedWeights.splice(usableWeights.indexOf(weight), 1);
 
-		let added: weightCombination = {
-			diff: target,
-			usedWeights: []
-		};
-		let subtracted: weightCombination = {
-			diff: target,
-			usedWeights: []
-		};
-
 		// Ensure weights of equal size only to be on one side
 		// 0 <= new target <= 10000 + biggest weight
 
-		if (!usedWeights.includes(weight) && target - weight >= 0) {
-			subtracted = nearestCombination(
-				target - weight,
-				shortenedWeights,
-				memo,
-				[...usedWeights, -weight]
-			);
-		}
-
-		if (
+		const subtracted =
+			!usedWeights.includes(weight) && target - weight >= 0
+				? nearestCombination(target - weight, shortenedWeights, memo, [
+						...usedWeights,
+						-weight
+				  ])
+				: undefined;
+		const added =
 			!usedWeights.includes(-weight) &&
 			target + weight <= 10000 + usableWeights[usableWeights.length - 1]
-		) {
-			added = nearestCombination(
-				target + weight,
-				shortenedWeights,
-				memo,
-				[...usedWeights, weight]
-			);
-		}
+				? nearestCombination(target + weight, shortenedWeights, memo, [
+						...usedWeights,
+						weight
+				  ])
+				: undefined;
 
-		bestCombination = determineBest([bestCombination, added, subtracted]);
+		bestCombination = determineBest(
+			bestCombination,
+			...(added !== undefined
+				? subtracted !== undefined
+					? [added, subtracted]
+					: [added]
+				: subtracted !== undefined
+				? [subtracted]
+				: [])
+		);
 
 		// Early return if a matching combination is found
 		if (bestCombination.diff === 0) {
@@ -71,10 +66,10 @@ export const nearestCombination = (
 };
 
 const determineBest = (
-	combinations: Array<weightCombination>
+	...combinations: Array<weightCombination>
 ): weightCombination => {
 	return combinations.sort((a, b) => {
-		// Make values positive for comparison
+		// Make negative values positive for comparison
 		a.diff = a.diff < 0 ? a.diff * -1 : a.diff;
 		b.diff = b.diff < 0 ? b.diff * -1 : b.diff;
 

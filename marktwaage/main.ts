@@ -6,7 +6,7 @@ import {
 
 const szenarios = 7;
 
-for (let i = 1; i < szenarios; i++) {
+for (let i = 0; i < szenarios; i++) {
 	const usableWeights = await convertInput(
 		`marktwaage/beispiele/gewichtsstuecke${i}.txt`
 	);
