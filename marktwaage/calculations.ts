@@ -79,8 +79,7 @@ const determineBest = (
 	})[0];
 };
 
-export const convertInput = async (path: string): Promise<Array<number>> => {
-	const textFile = await Deno.readTextFile(path);
+export const convertInput = (textFile: string): Array<number> => {
 	const [_weightsAmount, ...weightDescriptions] = textFile.split(/\r\n|\n/);
 
 	// Array.map() is not possible due to different Array lengths

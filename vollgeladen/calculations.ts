@@ -76,11 +76,9 @@ const substituteRoutes = (
 	return [...filteredRoutes, route];
 };
 
-export const convertInput = async (
-	path: string
-): Promise<[travelTime: number, hotels: Array<hotelInformation>]> => {
-	const textFile = await Deno.readTextFile(path);
-
+export const convertInput = (
+	textFile: string
+): [travelTime: number, hotels: Array<hotelInformation>] => {
 	const [_hotelsAmount, travelTime, ...hotelDescriptions] =
 		textFile.split(/\r\n|\n/);
 

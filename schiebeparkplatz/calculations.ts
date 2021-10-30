@@ -36,10 +36,9 @@ export const shiftHorizontal = (
 	return [...furtherShifts, currentShift];
 };
 
-export const convertInput = async (
-	path: string
-): Promise<[Array<string>, Array<horizontalCar>]> => {
-	const textFile = await Deno.readTextFile(path);
+export const convertInput = (
+	textFile: string
+): [Array<string>, Array<horizontalCar>] => {
 	const [verticalDescription, _horizontalAmount, ...horizontalDescriptions] =
 		textFile.split(/\r\n|\n/);
 

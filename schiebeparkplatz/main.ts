@@ -12,8 +12,8 @@ for (let i = 0; i < szenarios; i++) {
 	console.log(`Parkplatz ${i}
 	`);
 
-	const [verticalCars, horizontalCars] = await convertInput(
-		`schiebeparkplatz/beispiele/parkplatz${i}.txt`
+	const [verticalCars, horizontalCars] = convertInput(
+		await Deno.readTextFile(`schiebeparkplatz/beispiele/parkplatz${i}.txt`)
 	);
 
 	for (let carIndex = 0; carIndex < verticalCars.length; carIndex++) {

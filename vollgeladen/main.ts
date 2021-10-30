@@ -8,8 +8,8 @@ import {
 const szenarios = 7;
 
 for (let i = 0; i < szenarios; i++) {
-	const [travelTime, hotels] = await convertInput(
-		`vollgeladen/beispiele/hotels${i}.txt`
+	const [travelTime, hotels] = convertInput(
+		await Deno.readTextFile(`vollgeladen/beispiele/hotels${i}.txt`)
 	);
 
 	const filteredHotels = filterHotels(travelTime, hotels);
