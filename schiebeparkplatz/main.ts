@@ -6,7 +6,7 @@ import {
 	determineBest
 } from "./calculations.ts";
 
-const szenarios = 6;
+const szenarios = 9;
 
 for (let i = 0; i < szenarios; i++) {
 	console.log(`Parkplatz ${i}

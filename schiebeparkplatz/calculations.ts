@@ -76,12 +76,12 @@ export const convertOutput = (
 		.map((step, index) => {
 			const direction = step.direction === -1 ? "links" : "rechts";
 			return index === 0
-				? `: ${step.carLetter} ${step.positions} ${direction}`
+				? `${step.carLetter} ${step.positions} ${direction}`
 				: `, ${step.carLetter} ${step.positions} ${direction}`;
 		})
 		.join("");
 
-	return verticalCar + shiftInstructions;
+	return `${verticalCar}: ${shiftInstructions}`;
 };
 
 export const locateObstructing = (
