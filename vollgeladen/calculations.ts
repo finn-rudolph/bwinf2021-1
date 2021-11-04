@@ -95,15 +95,17 @@ export const convertInput = (
 };
 
 export const convertOutput = (travelRoute: route): string =>
-	travelRoute.intermediateStops
-		.map((hotel) => `${hotel.timestamp}	|  ${hotel.rating}`)
-		.reduce(
-			(acc, hotel) =>
-				(acc = `${acc}
+	travelRoute === undefined
+		? "	Erreichen des Ziels unmöglich"
+		: travelRoute.intermediateStops
+				.map((hotel) => `${hotel.timestamp}	|  ${hotel.rating}`)
+				.reduce(
+					(acc, hotel) =>
+						(acc = `${acc}
 	${hotel}`),
-			`	Minute 	|  Bewertung
+					`	Minute 	|  Bewertung
 		|`
-		);
+				);
 
 export const filterHotels = (
 	travelTime: number,
