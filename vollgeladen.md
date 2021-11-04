@@ -111,6 +111,198 @@ Die Funktion [`determineBest()`](###determineBest()) gibt die Route mit der best
 
 ## Beispiele
 
+*hotels1* bis *hotels5* sind die [Beispiele der bwinf-Seite](https://bwinf.de/bundeswettbewerb/40/1/), während alle weiteren selbst ausgedacht sind.
+
+Wegen der Größe habe ich die Eingabedateien von [*hotels3*](###hotels3), [*hotels4*](###hotels4) und [*hotels5*](###hotels5) nicht in die Dokumentation aufgenommen.
+
+### hotels0
+
+```txt
+7
+800
+20 5.0
+100 3.4
+145 2.2
+423 4.9
+423 1.0
+702 3.3
+783 5.0
+```
+
+```txt
+Minute 	|  Bewertung
+		|
+100		|  3.4
+423		|  4.9
+783		|  5
+```
+
+Dieses Beispiel kann ich manuell überprüfen, da es sehr kurz ist, was beispielsweise bei [hotels3](###hotels3) schwierig ist.
+
+### hotels1
+
+```txt
+12
+1680
+12 4.3
+326 4.8
+347 2.7
+359 2.6
+553 3.6
+590 0.8
+687 4.4
+1007 2.8
+1008 2.6
+1321 2.1
+1360 2.8
+1411 3.3
+```
+
+```txt
+Minute 	|  Bewertung
+		|
+347		|  2.7
+687		|  4.4
+1007	|  2.8
+1360	|  2.8
+```
+
+### hotels2
+
+```txt
+25
+1737
+340 1.6
+341 2.2
+341 2.3
+342 2.1
+360 1.9
+361 4.4
+362 3.1
+442 5.0
+567 4.9
+700 3.0
+710 2.9
+718 1.4
+987 4.6
+1051 2.3
+1053 4.8
+1057 0.2
+1199 5.0
+1279 5.0
+1367 4.5
+1377 1.8
+1377 1.6
+1377 2.0
+1378 2.1
+1378 2.2
+1380 5.0
+```
+
+```txt
+Minute 	|  Bewertung
+		|
+341		|  2.3
+700		|  3
+1053	|  4.8
+1380	|  5
+```
+
+### hotels3
+
+&rarr; [hotels3.txt](https://bwinf.de/fileadmin/user_upload/hotels3.txt)
+
+```txt
+Minute 	|  Bewertung
+		|
+359		|  4.6
+717		|  0.3
+1075	|  0.8
+1433	|  1.7
+```
+
+### hotels4
+
+&rarr; [hotels4.txt](https://bwinf.de/fileadmin/user_upload/hotels4.txt)
+
+```txt
+Minute 	|  Bewertung
+		|
+340		|  4.6
+676		|  4.6
+979		|  4.7
+1316	|  4.9
+```
+
+### hotels5
+
+&rarr; [hotels5.txt](https://bwinf.de/fileadmin/user_upload/hotels5.txt)
+
+```txt
+Minute 	|  Bewertung
+		|
+317		|  5
+636		|  5
+987		|  5
+1286	|  5
+```
+
+### hotels6
+
+```txt
+23
+1800
+35 1.3
+78 4.6
+104 2.4
+170 2.4
+171 4.1
+182 2.1
+202 5.0
+360 4.4
+500 3.2
+540 2.6
+720 1.2
+772 4.7
+808 3.0
+808 4.0
+808 2.2
+1010 1.1
+1056 1.6
+1080 3.9
+1305 2.9
+1440 4.8
+1600 4.0
+1662 2.7
+1665 3.7
+```
+
+```txt
+Minute 	|  Bewertung
+		|
+360		|  4.4
+720		|  1.2
+1080	|  3.9
+1440	|  4.8
+```
+
+Hier handelt es sich um einen Extremfall, weil das Ziel $5 \cdot 360min = 1800min$ (maximal weit) entfernt und damit nur über genau eine Hotelkombination erreichbar ist. Diese w korrekt erkannt, da alle Zwischenstopps bei einem Vielfachen von $360$ liegen.
+
+### hotels7
+
+```txt
+2
+1000
+302 2.3
+441 4.2
+```
+
+```txt
+Erreichen des Ziels unmöglich
+```
+
+Bei dieser Hotelauswahl ist eine zu große Lücke zwischen dem zweiten Hotel und dem Ziel vorhanden, sodass es nicht möglich ist, das Ziel mit maximal sechs Stunden Fahrtzeit pro Tag zu erreichen.
+
 ## Quellcode
 
 ### filterHotels()

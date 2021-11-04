@@ -5,7 +5,7 @@ import {
 	filterHotels
 } from "./calculations.ts";
 
-const szenarios = 7;
+const szenarios = 8;
 
 for (let i = 0; i < szenarios; i++) {
 	const [travelTime, hotels] = convertInput(
