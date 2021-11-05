@@ -4,10 +4,16 @@ Meine Lösungen für die drei Aufgaben "Schiebeparkplatz", "Vollgeladen" und "Ma
 
 ## Ausführung
 
-Das Projekt ist in Typescript für die [Deno Laufzeit](https://deno.land/) geschrieben. Zur Ausführung ist die [Installation von Deno](https://deno.land/#installation) notwendig. Die einzelnen Lösungen können durch die Ausführung von folgendem Befehl im Projektordner ausgeführt werden:
+Das Projekt ist in Typescript für die [Deno Laufzeit](https://deno.land/) geschrieben. Wenn Deno installiert ist, können die einzelnen Lösungen durch folgenden Befehl im Projektordner ausgeführt werden:
 
 ```
 deno run --allow-read <Name der Aufgabe>/main.ts
+```
+
+Ohne Deno können die ausführbaren Dateien verwendet werden:
+
+```
+./<Name der Aufgabe>-main
 ```
 
 ## Dokumentation
