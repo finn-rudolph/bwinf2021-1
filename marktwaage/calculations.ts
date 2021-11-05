@@ -1,68 +1,33 @@
 import { weightCombination, weightMemo } from "./types.ts";
 
-export const nearestCombination = (
-	target: number,
-	usableWeights: Array<number>,
-	memo: weightMemo = {},
-	usedWeights: Array<number> = []
-): weightCombination => {
-	if (target === 0 || usableWeights.length === 0)
-		return {
-			diff: target,
-			usedWeights: usedWeights
-		};
+export const nearestCombinations = (weights: Array<number>) => {
+	const combinationsTable: Array<Array<Array<number>>> = Array(
+		weights[weights.length]
+	)
+		.fill(undefined)
+		.map(() => []);
 
-	const memoKey = `${target}:${usableWeights.toString()}`;
-	if (memoKey in memo) return memo[memoKey];
+	combinationsTable[0] = [[]];
 
-	let bestCombination: weightCombination = {
-		diff: target,
-		usedWeights: []
-	};
+	fillTable(combinationsTable, weights);
+	console.log(combinationsTable);
+};
 
-	for (const weight of usableWeights) {
-		// Make a true copy, not only a reference copy
-		const shortenedWeights = [...usableWeights];
-		shortenedWeights.splice(usableWeights.indexOf(weight), 1);
+const fillTable = (
+	table: Array<Array<Array<number>>>,
+	weights: Array<number>,
+	startIndex = 0,
+	currentCombination: Array<number> = []
+) => {
+	for (let delta = 0; delta < weights.length; delta++) {
+		const nextCombination = [...currentCombination, weights[delta]];
+		const nextWeights = [...weights].splice(delta, 1);
 
-		// Ensure weights of equal size only to be on one side
-		// 0 <= new target <= 10000 + biggest weight
-
-		const subtracted =
-			!usedWeights.includes(weight) && target - weight >= 0
-				? nearestCombination(target - weight, shortenedWeights, memo, [
-						...usedWeights,
-						-weight
-				  ])
-				: undefined;
-		const added =
-			!usedWeights.includes(-weight) &&
-			target + weight <= 10000 + usableWeights[usableWeights.length - 1]
-				? nearestCombination(target + weight, shortenedWeights, memo, [
-						...usedWeights,
-						weight
-				  ])
-				: undefined;
-
-		bestCombination = determineBest(
-			bestCombination,
-			...(added !== undefined
-				? subtracted !== undefined
-					? [added, subtracted]
-					: [added]
-				: subtracted !== undefined
-				? [subtracted]
-				: [])
-		);
-
-		// Early return if a matching combination is found
-		if (bestCombination.diff === 0) {
-			memo[memoKey] = bestCombination;
-			return bestCombination;
-		}
+		if (startIndex + delta <= 10000 + weights[weights.length - 1])
+			fillTable(table, nextWeights, startIndex + delta, nextCombination);
+		if (startIndex - delta >= 0)
+			fillTable(table, nextWeights, startIndex - delta, nextCombination);
 	}
-	memo[memoKey] = bestCombination;
-	return bestCombination;
 };
 
 const determineBest = (

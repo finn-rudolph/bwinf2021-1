@@ -6,9 +6,9 @@ Bei dieser Aufgabe ist es nötig, nahezu alle möglichen Kombinationen an Gewich
 
 Zuerst gehe ich davon aus, dass das Ausgleichen von 0 in jedem Fall möglich ist, indem man kein Gewicht auf die Waage stellt. Wenn also von einem Zielgewicht ausgehend durch Addition und Subtraktion von vorhandenen Gewichten 0 erreicht wird, bevor alle Gewichte aufgebraucht sind, ist das Zielgewicht ausgleichbar.
 
-Allerdings ist es nicht sinnvoll, für ein Gewicht zwei Ausgleichsmöglichkeiten zu berechnen oder *Übergangsgewichte* größer als 10 000 plus das größte Gewicht des Gewichtssatzes. *Übergangsgewichte* nenne ich als Zwischenschritt notwendigerweise berechnete Gewichte, die keine tatsächliche Lösung eines Zielgewichts sind.
+Allerdings ist es nicht sinnvoll, für ein Gewicht zwei Ausgleichsmöglichkeiten zu berechnen oder Gewichte größer als 10 000 plus das größte Gewicht des Gewichtssatzes.
 
-Für jedes Ziel- und Übergangsgewicht existiert eine Liste an Gewichtskombinationen, mit denen es erreicht werden kann, falls das möglich ist. Diese Listen werden nach und nach mit Möglichkeiten gefüllt.
+Für jedes Ziel- und Zwischengewicht (Gewichte $>10000$, die zur Berechnung anderer notwendig sind) existiert eine Liste an Gewichtskombinationen, mit denen es erreicht werden kann, falls das möglich ist. Diese Listen werden nach und nach mit Möglichkeiten gefüllt.
 
 Beispiel (Gewichte: 2g, 5g; Zielgewichte 1g - 7g):
 
@@ -46,7 +46,7 @@ end
 
 subgraph " "
 5
-m5["[ [ 5 ] ]"]
+m0 --- m5["[ [ 5 ] ]"]
 end
 
 
