@@ -1,68 +1,44 @@
 import { weightCombination, weightMemo } from "./types.ts";
 
-export const nearestCombination = (
+export const greedySearch = (
 	target: number,
 	usableWeights: Array<number>,
-	memo: weightMemo = {},
-	usedWeights: Array<number> = []
+	memo: weightMemo = {}
 ): weightCombination => {
 	if (target === 0 || usableWeights.length === 0)
 		return {
 			diff: target,
-			usedWeights: usedWeights
+			usedWeights: []
 		};
 
 	const memoKey = `${target}:${usableWeights.toString()}`;
 	if (memoKey in memo) return memo[memoKey];
 
-	let bestCombination: weightCombination = {
+	const subtracting = target >= 0;
+
+	const diffs = usableWeights
+		.map((weight) => (subtracting ? target - weight : target + weight))
+		.sort((a, b) =>
+			a < 0 ? (b < 0 ? -a - -b : -a - b) : b < 0 ? a - -b : a - b
+		);
+	let best: weightCombination = {
 		diff: target,
 		usedWeights: []
 	};
 
-	for (const weight of usableWeights) {
-		// Make a true copy, not only a reference copy
+	for (let i = 0; i < diffs.length; i++) {
+		const weight = subtracting ? target - diffs[i] : diffs[i] - target;
 		const shortenedWeights = [...usableWeights];
 		shortenedWeights.splice(usableWeights.indexOf(weight), 1);
 
-		// Ensure weights of equal size only to be on one side
-		// 0 <= new target <= 10000 + biggest weight
+		const next = greedySearch(diffs[i], shortenedWeights, memo);
+		next.usedWeights.push(subtracting ? -weight : weight);
 
-		const subtracted =
-			!usedWeights.includes(weight) && target - weight >= 0
-				? nearestCombination(target - weight, shortenedWeights, memo, [
-						...usedWeights,
-						-weight
-				  ])
-				: undefined;
-		const added =
-			!usedWeights.includes(-weight) &&
-			target + weight <= 10000 + usableWeights[usableWeights.length - 1]
-				? nearestCombination(target + weight, shortenedWeights, memo, [
-						...usedWeights,
-						weight
-				  ])
-				: undefined;
-
-		bestCombination = determineBest(
-			bestCombination,
-			...(added !== undefined
-				? subtracted !== undefined
-					? [added, subtracted]
-					: [added]
-				: subtracted !== undefined
-				? [subtracted]
-				: [])
-		);
-
-		// Early return if a matching combination is found
-		if (bestCombination.diff === 0) {
-			memo[memoKey] = bestCombination;
-			return bestCombination;
-		}
+		best = determineBest(best, next);
+		if (best.diff === 0) return (memo[memoKey] = best);
 	}
-	memo[memoKey] = bestCombination;
-	return bestCombination;
+
+	return (memo[memoKey] = best);
 };
 
 const determineBest = (
@@ -70,8 +46,8 @@ const determineBest = (
 ): weightCombination => {
 	return combinations.sort((a, b) => {
 		// Make negative values positive for comparison
-		a.diff = a.diff < 0 ? a.diff * -1 : a.diff;
-		b.diff = b.diff < 0 ? b.diff * -1 : b.diff;
+		a.diff = a.diff < 0 ? -a.diff : a.diff;
+		b.diff = b.diff < 0 ? -b.diff : b.diff;
 
 		if (a.diff === b.diff)
 			return a.usedWeights.length - b.usedWeights.length;

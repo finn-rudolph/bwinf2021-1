@@ -2,31 +2,24 @@
 
 ## Lösungsidee
 
-Bei dieser Aufgabe ist es nötig, nahezu alle möglichen Kombinationen an Gewichten zu berechnen, die im Bereich 10 - 10000 liegen, da auch nicht genau passende berücksichtigt werden sollen. 
-
 Zuerst gehe ich davon aus, dass das Ausgleichen von 0 in jedem Fall möglich ist, indem man kein Gewicht auf die Waage stellt. Wenn also von einem Zielgewicht ausgehend durch Addition und Subtraktion von vorhandenen Gewichten 0 erreicht wird, bevor alle Gewichte aufgebraucht sind, ist das Zielgewicht ausgleichbar.
 
-Beispiel (Zielgewicht: 30g; Gewichte: 10g, 20g):
+Um nicht alle Kombinationsmöglichkeiten der Gewichte des Gewichtssatzes bestimmen zu müssen, wähle die *Greedy*-Strategie. Das Programm soll also nicht irgendwelche Gewichte addieren oder subtrahieren, sondern immer genau das, das am nähsten am Betrag des momentanen Zielgewichts dran ist. Falls das nicht zu einem Ergebnis führt, wird das zweitnähste genommen, dann das drittnähste usw. Im schlechtesten Fall führt das dazu, dass dennoch alle Möglichkeiten ausgerechnet werden, aber in den meisten Fällen kommt man so deutlich schneller zu einer Lösung.
+
+Beispiel (Zielgewichte: `150g, 200g`; Gewichte: `[10g, 20g, 30g, 80g, 90g]`)
 
 ```mermaid
 flowchart TB
 
-1((30g)) -->|+10| 21((40g))
-1 -->|-10| 22((20g))
-1 -->|+20| 23((50g))
-1 -->|-20| 24((10g))
+1((150g))
+-->|-90| 2((60g))
+-->|-80| 3(("-20g"))
+-->|+20| 4("0g")
 
-21 -->|+20| 31((60g))
-21 -->|-20| 32((20g))
-
-22 -->|+20| 33((40g))
-22 -->|-20| 34[0g]
-
-23 -->|+10| 35((60g))
-23 -->|-10| 36((40g))
-
-24 -->|+10| 37((20g))
-24 -->|-10| 38[0g]
+5((200g))
+-->|-90g| 6((110g))
+-->|-80g| 7((30g))
+-->|-30g| 8(0g)
 ```
 
 ## Umsetzung
