@@ -1,4 +1,4 @@
-import { weightCombination, weightMemo } from "./types.ts";
+import { weightCombination, weightMemo, moduloSum } from "./types.ts";
 
 export const greedySearch = (
 	target: number,
@@ -32,28 +32,71 @@ export const greedySearch = (
 		shortenedWeights.splice(usableWeights.indexOf(weight), 1);
 
 		const next = greedySearch(diffs[i], shortenedWeights, memo);
-		next.usedWeights.push(subtracting ? -weight : weight);
 
 		best = determineBest(best, next);
-		if (best.diff === 0) return (memo[memoKey] = best);
-	}
 
+		if (best.diff === 0) {
+			best.usedWeights.push(subtracting ? -weight : weight);
+			return (memo[memoKey] = best);
+		}
+	}
 	return (memo[memoKey] = best);
 };
 
 const determineBest = (
-	...combinations: Array<weightCombination>
+	a: weightCombination,
+	b: weightCombination
 ): weightCombination => {
-	return combinations.sort((a, b) => {
-		// Make negative values positive for comparison
-		a.diff = a.diff < 0 ? -a.diff : a.diff;
-		b.diff = b.diff < 0 ? -b.diff : b.diff;
+	// Make negative values positive for comparison
+	const aD = a.diff < 0 ? -a.diff : a.diff;
+	const bD = b.diff < 0 ? -b.diff : b.diff;
 
-		if (a.diff === b.diff)
-			return a.usedWeights.length - b.usedWeights.length;
-		return a.diff - b.diff;
-	})[0];
+	if (aD === bD) return a.usedWeights.length < b.usedWeights.length ? a : b;
+	return aD < bD ? a : b;
 };
+
+const div10 = (array: Array<number>) => {
+	const combinations: Array<Array<number>> = [];
+
+	for (let i = 0; i < array.length; i++) {
+		let remainder = array[i] % 10;
+	}
+};
+
+const sumMod10 = (array: Array<number>): number => {
+	let sums: Array<moduloSum> = new Array(10).fill(undefined).map(() => {
+		return {
+			sum: -0,
+			numbers: []
+		};
+	});
+
+	for (let i = 0; i < array.length; i++) {
+		const remainder = array[i] % 10;
+		const c = [...sums];
+
+		for (let j = 0; j < 10; j++)
+			if (sums[j].numbers.length !== 0) {
+				const v = (remainder + j) % 10;
+				if (sums[j].sum + array[i] > sums[v].sum) {
+					c[v] = {
+						sum: sums[j].sum + array[i],
+						numbers: [...sums[j].numbers, array[i]]
+					};
+				}
+			}
+
+		if (c[remainder].numbers.length === 0)
+			c[remainder] = { sum: array[i], numbers: [array[i]] };
+
+		sums = c;
+		console.log("b", sums);
+	}
+	console.log(sums);
+	return sums[0].sum;
+};
+
+console.log(sumMod10([2, 5, 2, 1, 7, 4, 2]));
 
 export const convertInput = (textFile: string): Array<number> => {
 	const [_weightsAmount, ...weightDescriptions] = textFile.split(/\r\n|\n/);
