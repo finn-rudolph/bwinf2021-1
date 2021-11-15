@@ -10,4 +10,9 @@ export type weightMemo = {
 export type moduloSum = {
 	sum: number;
 	numbers: Array<number>;
+	indices: Array<number>;
+};
+
+export type weightsMap = {
+	[key: number]: Array<number>;
 };

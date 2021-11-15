@@ -1,4 +1,9 @@
-import { weightCombination, weightMemo, moduloSum } from "./types.ts";
+import {
+	weightCombination,
+	weightMemo,
+	moduloSum,
+	weightsMap
+} from "./types.ts";
 
 export const greedySearch = (
 	target: number,
@@ -55,48 +60,112 @@ const determineBest = (
 	return aD < bD ? a : b;
 };
 
-const div10 = (array: Array<number>) => {
-	const combinations: Array<Array<number>> = [];
+export const unevenSearch = (
+	weights: Array<number>
+): Array<weightCombination> => {
+	const evenCombinations = sumsModulo10(weights.map((weight) => weight % 10));
+	console.log(evenCombinations);
 
-	for (let i = 0; i < array.length; i++) {
-		let remainder = array[i] % 10;
+	const map: weightsMap = {};
+
+	for (let i = 0; i < evenCombinations.length; i++) {
+		const usedWeights = evenCombinations[i].map((i) =>
+			i < 0 ? -weights[-i] : weights[i]
+		);
+
+		const sum = usedWeights.reduce((sum, weight) => sum + weight);
+
+		console.log(sum, usedWeights);
+
+		if (sum > 0 && (!(sum in map) || map[sum].length > usedWeights.length))
+			map[sum] = usedWeights;
 	}
+
+	const combinations: Array<weightCombination> = [];
+
+	for (let i = 10; i < 10010; i += 10) {
+		if (i in map) combinations[i / 10] = { diff: 0, usedWeights: map[i] };
+		else {
+			const closestCombination = Number(
+				Object.keys(map).reduce((closest, current) =>
+					Math.abs(Number(current) - i) <
+					Math.abs(Number(closest) - i)
+						? current
+						: closest
+				)
+			);
+			2;
+			combinations[i / 10] = {
+				diff: Math.abs(i - closestCombination),
+				usedWeights: map[closestCombination]
+			};
+		}
+	}
+	return combinations;
 };
 
-const sumMod10 = (array: Array<number>): number => {
-	let sums: Array<moduloSum> = new Array(10).fill(undefined).map(() => {
-		return {
-			sum: -0,
-			numbers: []
-		};
-	});
+const sumsModulo10 = (array: Array<number>): Array<Array<number>> => {
+	const counts: { [key: number]: number } = {};
+
+	for (let i = 0; i < array.length; i++) {
+		if (!(array[i] in counts)) counts[array[i]] = 1;
+		else counts[array[i]] += 1;
+	}
+
+	const sums: Array<Array<moduloSum>> = new Array(10)
+		.fill(undefined)
+		.map(() => []);
 
 	for (let i = 0; i < array.length; i++) {
 		const remainder = array[i] % 10;
-		const c = [...sums];
 
-		for (let j = 0; j < 10; j++)
-			if (sums[j].numbers.length !== 0) {
-				const v = (remainder + j) % 10;
-				if (sums[j].sum + array[i] > sums[v].sum) {
-					c[v] = {
-						sum: sums[j].sum + array[i],
-						numbers: [...sums[j].numbers, array[i]]
-					};
+		for (let d = 0; d < 10; d++)
+			if (sums[d].length !== 0) {
+				const positiveD = (remainder + d) % 10;
+				const negativeD = (10 - remainder + d) % 10;
+
+				for (let k = 0; k < sums[d].length; k++) {
+					sums[d][k].numbers = sums[d][k].numbers.sort();
+					if (
+						sums[d][k].numbers.indexOf(array[i]) === -1 ||
+						sums[d][k].numbers.lastIndexOf(array[i]) -
+							sums[d][k].numbers.indexOf(array[i]) +
+							1 <
+							counts[array[i]]
+					) {
+						if (sums[d][k].indices.indexOf(-i) === -1)
+							sums[positiveD].push({
+								sum: sums[d][k].sum + array[i],
+								numbers: [...sums[d][k].numbers, array[i]],
+								indices: [...sums[d][k].indices, i]
+							});
+						if (sums[d][k].indices.indexOf(i) === -1)
+							sums[negativeD].push({
+								sum: sums[d][k].sum - array[i],
+								numbers: [...sums[d][k].numbers, array[i]],
+								indices: [...sums[d][k].indices, -i]
+							});
+					}
 				}
 			}
 
-		if (c[remainder].numbers.length === 0)
-			c[remainder] = { sum: array[i], numbers: [array[i]] };
-
-		sums = c;
-		console.log("b", sums);
+		if (sums[remainder].length === 0)
+			sums[remainder].push({
+				sum: array[i],
+				numbers: [array[i]],
+				indices: [i]
+			});
 	}
-	console.log(sums);
-	return sums[0].sum;
+	return sums[0].map((sum) => sum.indices);
 };
 
-console.log(sumMod10([2, 5, 2, 1, 7, 4, 2]));
+export const isUneven = (weights: Array<number>): boolean => {
+	let unevenCount = 0;
+	for (let i = 0; i < weights.length; i++) {
+		if (weights[i] % 10 !== 0) unevenCount++;
+	}
+	return unevenCount > weights.length / 2;
+};
 
 export const convertInput = (textFile: string): Array<number> => {
 	const [_weightsAmount, ...weightDescriptions] = textFile.split(/\r\n|\n/);
