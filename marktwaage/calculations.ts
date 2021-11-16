@@ -1,82 +1,63 @@
-import { weightCombination, weightMemo } from "./types.ts";
+import { weightCombination } from "./types.ts";
 
-export const nearestCombination = (
-	target: number,
-	usableWeights: Array<number>,
-	memo: weightMemo = {},
-	usedWeights: Array<number> = []
+export const findCombination = (
+	weights: Array<number>,
+	target: number
 ): weightCombination => {
-	if (target === 0 || usableWeights.length === 0)
-		return {
-			diff: target,
-			usedWeights: usedWeights
-		};
-
-	const memoKey = `${target}:${usableWeights.toString()}`;
-	if (memoKey in memo) return memo[memoKey];
-
-	let bestCombination: weightCombination = {
-		diff: target,
-		usedWeights: []
-	};
-
-	for (const weight of usableWeights) {
-		// Make a true copy, not only a reference copy
-		const shortenedWeights = [...usableWeights];
-		shortenedWeights.splice(usableWeights.indexOf(weight), 1);
-
-		// Ensure weights of equal size only to be on one side
-		// 0 <= new target <= 10000 + biggest weight
-
-		const subtracted =
-			!usedWeights.includes(weight) && target - weight >= 0
-				? nearestCombination(target - weight, shortenedWeights, memo, [
-						...usedWeights,
-						-weight
-				  ])
-				: undefined;
-		const added =
-			!usedWeights.includes(-weight) &&
-			target + weight <= 10000 + usableWeights[usableWeights.length - 1]
-				? nearestCombination(target + weight, shortenedWeights, memo, [
-						...usedWeights,
-						weight
-				  ])
-				: undefined;
-
-		bestCombination = determineBest(
-			bestCombination,
-			...(added !== undefined
-				? subtracted !== undefined
-					? [added, subtracted]
-					: [added]
-				: subtracted !== undefined
-				? [subtracted]
-				: [])
+	const table: Array<Array<Array<number>>> = new Array(weights.length + 1)
+		.fill(0)
+		.map(() =>
+			new Array(target + weights[weights.length - 1] + 1)
+				.fill(0)
+				.map(() => new Array(weights.length + 1).fill(0))
 		);
 
-		// Early return if a matching combination is found
-		if (bestCombination.diff === 0) {
-			memo[memoKey] = bestCombination;
-			return bestCombination;
+	// Seed: target 0 is reachable with 0 weights taken
+	table[weights.length][0][0] = 1;
+
+	for (let i = weights.length - 1; i >= 0; i--) {
+		const weight = weights[i];
+		for (let j = 0; j <= target + weights[weights.length - 1]; j++) {
+			for (let k = 0; k <= weights.length; k++) {
+				const max =
+					j >= weight &&
+					k > 0 &&
+					j - weight < target + weights[weights.length - 1] + 1
+						? Math.max(
+								table[i + 1][j - weight][k - 1],
+								table[i + 1][j][k]
+						  )
+						: table[i + 1][j][k];
+				table[i][j][k] += max;
+			}
 		}
 	}
-	memo[memoKey] = bestCombination;
-	return bestCombination;
+
+	const usedWeights = searchTable(target, weights, table);
+	return usedWeights === undefined
+		? {
+				diff: NaN,
+				usedWeights: []
+		  }
+		: { diff: 0, usedWeights: usedWeights };
 };
 
-const determineBest = (
-	...combinations: Array<weightCombination>
-): weightCombination => {
-	return combinations.sort((a, b) => {
-		// Make negative values positive for comparison
-		a.diff = a.diff < 0 ? a.diff * -1 : a.diff;
-		b.diff = b.diff < 0 ? b.diff * -1 : b.diff;
+const searchTable = (
+	target: number,
+	weights: Array<number>,
+	table: Array<Array<Array<number>>>
+): Array<number> | undefined => {
+	if (target === 0) return [];
 
-		if (a.diff === b.diff)
-			return a.usedWeights.length - b.usedWeights.length;
-		return a.diff - b.diff;
-	})[0];
+	for (let i = table.length - 1; i >= 0; i--) {
+		for (let k = 0; k < table[i][target].length; k++) {
+			if (table[i][target][k] === 1) {
+				const next = searchTable(target - weights[i], weights, table);
+				return next === undefined ? next : [...next, weights[i]];
+			}
+		}
+	}
+	return undefined;
 };
 
 export const convertInput = (textFile: string): Array<number> => {
