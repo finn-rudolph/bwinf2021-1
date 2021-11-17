@@ -7,7 +7,7 @@ import {
 
 const szenarios = 7;
 
-for (let i = 0; i < 6; i++) {
+for (let i = 0; i < szenarios; i++) {
 	const usableWeights = convertInput(
 		await Deno.readTextFile(`marktwaage/beispiele/gewichtsstuecke${i}.txt`)
 	);
@@ -18,18 +18,20 @@ for (let i = 0; i < 6; i++) {
 	const table = createTable(usableWeights);
 
 	for (let target = 10; target < 10010; target += 10) {
-		const usedWeights = searchTable(target, usableWeights, table);
+		for (let d = 0; d < target; d++) {
+			// Search for the closest solution
+			const higher = searchTable(target + d, usableWeights, table);
+			const lower = searchTable(target - d, usableWeights, table);
 
-		console.log(
-			convertOutput(
-				target,
-				usedWeights === undefined
-					? {
-							diff: NaN,
-							usedWeights: []
-					  }
-					: { diff: 0, usedWeights: usedWeights }
-			)
-		);
+			if (higher !== undefined || lower !== undefined) {
+				console.log(
+					convertOutput(target, {
+						diff: d,
+						usedWeights: higher !== undefined ? higher : lower!
+					})
+				);
+				break;
+			}
+		}
 	}
 }

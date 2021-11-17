@@ -56,7 +56,6 @@ export const searchTable = (
 export const convertInput = (textFile: string): Array<number> => {
 	const [_weightsAmount, ...weightDescriptions] = textFile.split(/\r\n|\n/);
 
-	// Array.map() is not possible due to different Array lengths
 	let weights: Array<number> = [];
 
 	for (const weightDescription of weightDescriptions) {
