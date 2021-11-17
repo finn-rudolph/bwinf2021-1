@@ -2,34 +2,63 @@
 
 ## Lösungsidee
 
-Bei dieser Aufgabe ist es nötig, nahezu alle möglichen Kombinationen an Gewichten zu berechnen, die im Bereich 10 - 10000 liegen, da auch nicht genau passende berücksichtigt werden sollen. 
+Um diese Aufgabe zu lösen, werde ich schrittweise für jedes Zielgewicht in einem sinnvollen Bereich ($Zielgewicht_{max} + Gewicht_{max}$) bestimmen, ob es ausgleichbar ist oder nicht und mit wie vielen benutzten Gewichten. Dazu wird zunächst nur ein Teil des Gewichtssatzes herangezogen und alle möglichen Lösungen mit diesem bestimmt. Der Teil des Gewichtssatzes wird schrittweise vergrößert, bis zum Schluss alle Gewichte verfügbar sind. Zuerst wird ein leerer Gewichtssatz herangezogen, mit dem nur das Zielgewicht $0$ unter Gebrauch von $0$ Gewichten möglich ist. Danach wird das letzte Gewicht im Gewichtssatz hinzugenommen, dann das vorletzte usw. Diese Vorgehensweise hat zwei Vorteile:
 
-Zuerst gehe ich davon aus, dass das Ausgleichen von 0 in jedem Fall möglich ist, indem man kein Gewicht auf die Waage stellt. Wenn also von einem Zielgewicht ausgehend durch Addition und Subtraktion von vorhandenen Gewichten 0 erreicht wird, bevor alle Gewichte aufgebraucht sind, ist das Zielgewicht ausgleichbar.
+- Weil die Menge aller möglichen Lösungen mit $k$ verfügbaren Gewichten eine Untermenge der möglichen Lösungen mit $k + 1$ verfügbaren Gewichten ist, kann auf der vorherigen Menge aufgebaut werden um die nächste zu bestimmen.
+- Da nur abgespeichert wird, *ob* und mit *wie vielen* Gewichten ein Zielgewicht erreichbar ist, und nicht genau *wie*, bleibt der Arbeitsspeicherbedarf im Rahmen.
 
-Beispiel (Zielgewicht: 30g; Gewichte: 10g, 20g):
+Beispiel (Zielgewicht: 30g, Gewichte 10g, 20g, 40g):
 
 ```mermaid
-flowchart TB
+flowchart RL
 
-1((30g)) -->|+10| 21((40g))
-1 -->|-10| 22((20g))
-1 -->|+20| 23((50g))
-1 -->|-20| 24((10g))
+subgraph verfügbarer Gewichtssatz
 
-21 -->|+20| 31((60g))
-21 -->|-20| 32((20g))
+1["[ ]"] -->
+2["[ 40g ]"] -->
+3["[ 20g, 40g ]"] -->
+4["[ 10g, 20g, 40g ]"]
 
-22 -->|+20| 33((40g))
-22 -->|-20| 34[0g]
+end
 
-23 -->|+10| 35((60g))
-23 -->|-10| 36((40g))
+subgraph ausgleichbare Zielgewichte
 
-24 -->|+10| 37((20g))
-24 -->|-10| 38[0g]
+1 -.- 11["0g: 0
+"]
+
+2 -.- 22["0g: 0
+40g: 1"]
+
+3 -.- 33["0g: 0
+20g: 1, 2
+40g: 1"]
+
+4 -.- 44["0g: 0
+10g: 1, 2
+20g: 1, 2
+30g: 2, 2
+40g: 1"]
+
+11 --- 22 --- 33 --- 44
+
+end
 ```
 
+**oberer Abschnitt**: Der Gewichtssatz wird schrittweise von hinten anfangend erweitert. 
+
+**unterer Abschnitt**: Informationen, welche Zielgewichte mit wie vielen Gewichten erreicht werden können. Mehrere Möglichkeiten, ein Zielgewicht auszugleichen, sind durch ein Komma abgetrennt.
+
+Die Tabelle kann von hinten nach vorne durchgegangen werden, bis eine Lösung für das gewünschte Zielgewicht erscheint. Das gerade neu verfügbar gewordene Gewicht muss in jedem Fall relevant für die Lösung sein, weil sie davor noch nicht vorhanden war. Mit diesem Wissen können die für die Lösung benötigten Gewichte bestimmt werden, indem der Ablauf rekursiv für $Zielgewicht - hinzugenommenes \space Gewicht$ wiederholt wird, bis man bei $0$ landet.
+
 ## Umsetzung
+
+&rarr; Eine 1 an der Stelle $tabelle[i][j][k]$ bedeutet, dass das Gewicht `j` mit `k` gebrauchten Gewichten aus der Menge  $gewicht_i, \space gewicht_{i+1}, \space ..., \space gewicht_n$  ausgleichbar ist, wobei $n$ die Länge des Gewichtssatzes ist.
+
+Diese Informationen speichere ich in einer dreidimensionalen Tabelle:
+
+1. Die erste Dimension ist genauso lang wie der Gewichtssatz, weil für jedes Gewicht abgespeichert werden soll, welche Zielgewichte mit ihm und allen Gewichten hinter ihm erreichbar sind. Das Auffüllen der Tabelle beginnt folglich von hinten, weil zuerst nur ein Gewicht, am Ende aber alle verfügbar sein sollen.
+2. Die zweite Dimension hat die Länge des größten Zielgewichts + des größten Gewichts im Gewichtssatz, weil das die Spanne aller sinnvollen Zielgewichte ist. Man muss leider über das größte Zielgewicht hinausgehen, da es Lösungen geben kann, bei denen von einem größeren Gewicht wieder etwas abgezogen wurde (&rarr; zwei Seiten der Waage).
+3. In der dritten Dimension wird repräsentiert, wie viele Gewichte für die Lösung gebraucht wurden, sie ist also so lang wie der Gewichtssatz. Bei den Indizes werden 0 oder 1 eingetragen, eine 1 bedeutet, dass das Zielgewicht mit dem Index entsprechend vielen Gewichten ausgleichbar ist.
 
 Dieses Konzept setze ich in [Typescript](https://www.typescriptlang.org/) mit der Laufzeit [Deno](https://deno.land/) um. Ich schreibe wegen einer besseren Lesbarkeit auf Englisch, da Typescript selbst englischbasiert ist.
 
