@@ -1,28 +1,28 @@
 import { weightCombination } from "./types.ts";
 
-export const findCombination = (
+export const createTable = (
 	weights: Array<number>,
-	target: number
-): weightCombination => {
+	maxTarget = 10000
+): Array<Array<Array<number>>> => {
 	const table: Array<Array<Array<number>>> = new Array(weights.length + 1)
 		.fill(0)
 		.map(() =>
-			new Array(target + weights[weights.length - 1] + 1)
+			new Array(maxTarget + weights[weights.length - 1] + 1)
 				.fill(0)
 				.map(() => new Array(weights.length + 1).fill(0))
 		);
 
-	// Seed: target 0 is reachable with 0 weights taken
+	// Seed: target 0 is reachable with 0 weights taken and 0 weights available
 	table[weights.length][0][0] = 1;
 
 	for (let i = weights.length - 1; i >= 0; i--) {
 		const weight = weights[i];
-		for (let j = 0; j <= target + weights[weights.length - 1]; j++) {
+		for (let j = 0; j <= maxTarget + weights[weights.length - 1]; j++) {
 			for (let k = 0; k <= weights.length; k++) {
 				const max =
 					j >= weight &&
 					k > 0 &&
-					j - weight < target + weights[weights.length - 1] + 1
+					j - weight < maxTarget + weights[weights.length - 1] + 1
 						? Math.max(
 								table[i + 1][j - weight][k - 1],
 								table[i + 1][j][k]
@@ -32,17 +32,10 @@ export const findCombination = (
 			}
 		}
 	}
-
-	const usedWeights = searchTable(target, weights, table);
-	return usedWeights === undefined
-		? {
-				diff: NaN,
-				usedWeights: []
-		  }
-		: { diff: 0, usedWeights: usedWeights };
+	return table;
 };
 
-const searchTable = (
+export const searchTable = (
 	target: number,
 	weights: Array<number>,
 	table: Array<Array<Array<number>>>
@@ -53,7 +46,7 @@ const searchTable = (
 		for (let k = 0; k < table[i][target].length; k++) {
 			if (table[i][target][k] === 1) {
 				const next = searchTable(target - weights[i], weights, table);
-				return next === undefined ? next : [...next, weights[i]];
+				return next === undefined ? next : [...next, -weights[i]];
 			}
 		}
 	}
@@ -73,7 +66,7 @@ export const convertInput = (textFile: string): Array<number> => {
 			weights = [...weights, Number(weight)];
 		}
 	}
-	return weights;
+	return [...weights.map((w) => -w), ...weights];
 };
 
 export const convertOutput = (
