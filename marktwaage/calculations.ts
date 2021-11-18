@@ -3,33 +3,22 @@ import { weightCombination } from "./types.ts";
 export const createTable = (
 	weights: Array<number>,
 	maxTarget = 10000
-): Array<Map<number, Array<number>>> => {
-	const table: Array<Map<number, Array<number>>> = new Array(
-		weights.length + 1
-	)
+): Array<Set<number>> => {
+	const table: Array<Set<number>> = new Array(weights.length + 1)
 		.fill(0)
-		.map(() => new Map());
+		.map(() => new Set());
 
-	// Seed: target 0 is reachable with 0 weights taken and 0 weights available
-	table[weights.length].set(0, [0]);
-	const maxWeight = Math.max(weights[weights.length - 1]);
+	// Seed: target 0 is reachable with 0 weights available
+	table[weights.length].add(0);
+	const maxWeight = weights[weights.length - 1];
 
 	for (let i = weights.length - 1; i >= 0; i--) {
 		const weight = weights[i];
-		for (const key of table[i + 1].keys()) {
-			table[i].set(key, [...table[i + 1].get(key)!]);
+		for (const v of table[i + 1].values()) {
+			table[i].add(v);
 
-			if (key + weight > 0 && key + weight < maxTarget + maxWeight) {
-				if (table[i].get(key + weight) !== undefined)
-					table[i]
-						.get(key + weight)!
-						.push(...table[i].get(key)!.map((k) => k + 1));
-				else
-					table[i].set(
-						key + weight,
-						table[i].get(key)!.map((k) => k + 1)
-					);
-			}
+			if (v + weight > 0 && v + weight < maxTarget + maxWeight)
+				table[i].add(v + weight);
 		}
 	}
 	return table;
@@ -38,12 +27,12 @@ export const createTable = (
 export const searchTable = (
 	target: number,
 	weights: Array<number>,
-	table: Array<Map<number, Array<number>>>
+	table: Array<Set<number>>
 ): Array<number> | undefined => {
 	if (target === 0) return [];
 
 	for (let i = table.length - 1; i >= 0; i--) {
-		if (table[i].get(target) !== undefined) {
+		if (table[i].has(target)) {
 			const next = searchTable(target - weights[i], weights, table);
 			return next === undefined ? next : [...next, -weights[i]];
 		}
