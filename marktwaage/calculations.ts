@@ -3,32 +3,32 @@ import { weightCombination } from "./types.ts";
 export const createTable = (
 	weights: Array<number>,
 	maxTarget = 10000
-): Array<Array<Array<number>>> => {
-	const table: Array<Array<Array<number>>> = new Array(weights.length + 1)
+): Array<Map<number, Array<number>>> => {
+	const table: Array<Map<number, Array<number>>> = new Array(
+		weights.length + 1
+	)
 		.fill(0)
-		.map(() =>
-			new Array(maxTarget + weights[weights.length - 1] + 1)
-				.fill(0)
-				.map(() => new Array(weights.length + 1).fill(0))
-		);
+		.map(() => new Map());
 
 	// Seed: target 0 is reachable with 0 weights taken and 0 weights available
-	table[weights.length][0][0] = 1;
+	table[weights.length].set(0, [0]);
+	const maxWeight = Math.max(weights[weights.length - 1]);
 
 	for (let i = weights.length - 1; i >= 0; i--) {
 		const weight = weights[i];
-		for (let j = 0; j <= maxTarget + weights[weights.length - 1]; j++) {
-			for (let k = 0; k <= weights.length; k++) {
-				const max =
-					j >= weight &&
-					k > 0 &&
-					j - weight < maxTarget + weights[weights.length - 1] + 1
-						? Math.max(
-								table[i + 1][j - weight][k - 1],
-								table[i + 1][j][k]
-						  )
-						: table[i + 1][j][k];
-				table[i][j][k] += max;
+		for (const key of table[i + 1].keys()) {
+			table[i].set(key, [...table[i + 1].get(key)!]);
+
+			if (key + weight > 0 && key + weight < maxTarget + maxWeight) {
+				if (table[i].get(key + weight) !== undefined)
+					table[i]
+						.get(key + weight)!
+						.push(...table[i].get(key)!.map((k) => k + 1));
+				else
+					table[i].set(
+						key + weight,
+						table[i].get(key)!.map((k) => k + 1)
+					);
 			}
 		}
 	}
@@ -38,16 +38,14 @@ export const createTable = (
 export const searchTable = (
 	target: number,
 	weights: Array<number>,
-	table: Array<Array<Array<number>>>
+	table: Array<Map<number, Array<number>>>
 ): Array<number> | undefined => {
 	if (target === 0) return [];
 
 	for (let i = table.length - 1; i >= 0; i--) {
-		for (let k = 0; k < table[i][target].length; k++) {
-			if (table[i][target][k] === 1) {
-				const next = searchTable(target - weights[i], weights, table);
-				return next === undefined ? next : [...next, -weights[i]];
-			}
+		if (table[i].get(target) !== undefined) {
+			const next = searchTable(target - weights[i], weights, table);
+			return next === undefined ? next : [...next, -weights[i]];
 		}
 	}
 	return undefined;

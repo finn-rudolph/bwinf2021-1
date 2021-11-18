@@ -7,7 +7,7 @@ import {
 
 const szenarios = 7;
 
-for (let i = 0; i < szenarios; i++) {
+for (let i = 5; i < 6; i++) {
 	const usableWeights = convertInput(
 		await Deno.readTextFile(`marktwaage/beispiele/gewichtsstuecke${i}.txt`)
 	);
