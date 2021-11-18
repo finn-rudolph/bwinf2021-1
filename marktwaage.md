@@ -2,10 +2,10 @@
 
 ## Lösungsidee
 
-Um diese Aufgabe zu lösen, werde ich schrittweise für jedes Zielgewicht in einem sinnvollen Bereich ($Zielgewicht_{max} + Gewicht_{max}$) bestimmen, ob es ausgleichbar ist oder nicht und mit wie vielen benutzten Gewichten. Dazu wird zunächst nur ein Teil des Gewichtssatzes herangezogen und alle möglichen Lösungen mit diesem bestimmt. Der Teil des Gewichtssatzes wird schrittweise vergrößert, bis zum Schluss alle Gewichte verfügbar sind. Zuerst wird ein leerer Gewichtssatz herangezogen, mit dem nur das Zielgewicht $0$ unter Gebrauch von $0$ Gewichten möglich ist. Danach wird das letzte Gewicht im Gewichtssatz hinzugenommen, dann das vorletzte usw. Diese Vorgehensweise hat zwei Vorteile:
+Um diese Aufgabe zu lösen, werde ich für jedes Zielgewicht in einem sinnvollen Bereich ($Zielgewicht_{max} + Gewicht_{max}$) bestimmen, ob es ausgleichbar ist oder nicht. Dazu wird zunächst nur ein Teil des Gewichtssatzes herangezogen, der schrittweise vergrößert wird, bis zum Schluss alle Gewichte verfügbar sind. Zuerst wird ein leerer Gewichtssatz herangezogen, dann wird das letzte Gewicht im Gewichtssatz hinzugenommen, dann das vorletzte usw. Diese Vorgehensweise hat zwei Vorteile:
 
 - Weil die Menge aller möglichen Lösungen mit $k$ verfügbaren Gewichten eine Untermenge der möglichen Lösungen mit $k + 1$ verfügbaren Gewichten ist, kann auf der vorherigen Menge aufgebaut werden um die nächste zu bestimmen.
-- Da nur abgespeichert wird, *ob* und mit *wie vielen* Gewichten ein Zielgewicht erreichbar ist, und nicht genau *wie*, bleibt der Arbeitsspeicherbedarf im Rahmen.
+- Da nur abgespeichert wird, *ob* ein Zielgewicht erreichbar ist, und nicht genau *wie*, bleibt der Arbeitsspeicherbedarf im Rahmen.
 
 Beispiel (Zielgewicht: 30g, Gewichte 10g, 20g, 40g):
 
@@ -23,30 +23,33 @@ end
 
 subgraph ausgleichbare Zielgewichte
 
-1 -.- 11["0g: 0
-"]
+1 -.- 11["0g"]
 
-2 -.- 22["0g: 0
-40g: 1"]
+2 -.- 22["0g
+40g"]
 
-3 -.- 33["0g: 0
-20g: 1, 2
-40g: 1"]
+3 -.- 33["0g
+20g
+40g
+60g"]
 
-4 -.- 44["0g: 0
-10g: 1, 2
-20g: 1, 2
-30g: 2, 2
-40g: 1"]
+4 -.- 44["0g
+10g
+20g
+30g
+40g
+50g
+60g
+70g"]
 
 11 --- 22 --- 33 --- 44
 
 end
 ```
 
-**oberer Abschnitt**: Der Gewichtssatz wird schrittweise von hinten anfangend erweitert. 
+**oberer Abschnitt**: Der verfügbare Gewichtssatz wird schrittweise von hinten anfangend erweitert. 
 
-**unterer Abschnitt**: Informationen, welche Zielgewichte mit wie vielen Gewichten erreicht werden können. Mehrere Möglichkeiten, ein Zielgewicht auszugleichen, sind durch ein Komma abgetrennt.
+**unterer Abschnitt**: Alle mit dem entsprechenden Untergewichtssatz erreichbaren Zielgewichte 
 
 Die Tabelle kann von hinten nach vorne durchgegangen werden, bis eine Lösung für das gewünschte Zielgewicht erscheint. Das gerade neu verfügbar gewordene Gewicht muss in jedem Fall relevant für die Lösung sein, weil sie davor noch nicht vorhanden war. Mit diesem Wissen können die für die Lösung benötigten Gewichte bestimmt werden, indem der Ablauf rekursiv für $Zielgewicht - hinzugenommenes \space Gewicht$ wiederholt wird, bis man bei $0$ landet.
 
