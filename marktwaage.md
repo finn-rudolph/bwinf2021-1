@@ -2,12 +2,12 @@
 
 ## Lösungsidee
 
-Um diese Aufgabe zu lösen, werde ich für jedes Zielgewicht in einem sinnvollen Bereich ($Zielgewicht_{max} + Gewicht_{max}$) bestimmen, ob es ausgleichbar ist oder nicht. Dazu wird zunächst nur ein Teil des Gewichtssatzes herangezogen, der schrittweise vergrößert wird, bis zum Schluss alle Gewichte verfügbar sind. Zuerst wird ein leerer Gewichtssatz herangezogen, dann wird das letzte Gewicht im Gewichtssatz hinzugenommen, dann das vorletzte usw. Diese Vorgehensweise hat zwei Vorteile:
+Um diese Aufgabe zu lösen, werde ich für jedes Zielgewicht in einem sinnvollen Bereich ($0 \space bis \space Zielgewicht_{max} + Gewicht_{max}$) bestimmen, ob es ausgleichbar ist oder nicht. Dazu wird zunächst nur ein Teil des Gewichtssatzes herangezogen, der schrittweise vergrößert wird, bis zum Schluss alle Gewichte verfügbar sind. Zuerst wird nur das letzte Gewicht des Gewichtssatzes herangezogen, dann das vorletzte hinzugenommen usw. Diese Vorgehensweise hat zwei Vorteile:
 
 - Weil die Menge aller möglichen Lösungen mit $k$ verfügbaren Gewichten eine Untermenge der möglichen Lösungen mit $k + 1$ verfügbaren Gewichten ist, kann auf der vorherigen Menge aufgebaut werden um die nächste zu bestimmen.
 - Da nur abgespeichert wird, *ob* ein Zielgewicht erreichbar ist, und nicht genau *wie*, bleibt der Arbeitsspeicherbedarf im Rahmen.
 
-Beispiel (Zielgewicht: 30g, Gewichte 10g, 20g, 40g):
+Beispiel (Zielgewicht: 30g, Gewichte: 10g, 20g, 40g):
 
 ```mermaid
 flowchart RL
@@ -51,53 +51,53 @@ end
 
 **unterer Abschnitt**: Alle mit dem entsprechenden Untergewichtssatz erreichbaren Zielgewichte 
 
-Die Tabelle kann von hinten nach vorne durchgegangen werden, bis eine Lösung für das gewünschte Zielgewicht erscheint. Das gerade neu verfügbar gewordene Gewicht muss in jedem Fall relevant für die Lösung sein, weil sie davor noch nicht vorhanden war. Mit diesem Wissen können die für die Lösung benötigten Gewichte bestimmt werden, indem der Ablauf rekursiv für $Zielgewicht - hinzugenommenes \space Gewicht$ wiederholt wird, bis man bei $0$ landet.
+Die Liste kann von hinten nach vorne durchgegangen werden, bis eine Lösung für das gewünschte Zielgewicht erscheint. Das gerade neu verfügbar gewordene Gewicht muss in jedem Fall relevant für die Lösung sein, weil sie davor noch nicht vorhanden war. Mit diesem Wissen können die für die Lösung benötigten Gewichte bestimmt werden, indem der Ablauf rekursiv für $Zielgewicht - hinzugenommenes \space Gewicht$ wiederholt wird, bis man bei $0$ landet.
 
 ## Umsetzung
 
-&rarr; Eine 1 an der Stelle $tabelle[i][j][k]$ bedeutet, dass das Gewicht `j` mit `k` gebrauchten Gewichten aus der Menge  $gewicht_i, \space gewicht_{i+1}, \space ..., \space gewicht_n$  ausgleichbar ist, wobei $n$ die Länge des Gewichtssatzes ist.
-
-Diese Informationen speichere ich in einer dreidimensionalen Tabelle:
-
-1. Die erste Dimension ist genauso lang wie der Gewichtssatz, weil für jedes Gewicht abgespeichert werden soll, welche Zielgewichte mit ihm und allen Gewichten hinter ihm erreichbar sind. Das Auffüllen der Tabelle beginnt folglich von hinten, weil zuerst nur ein Gewicht, am Ende aber alle verfügbar sein sollen.
-2. Die zweite Dimension hat die Länge des größten Zielgewichts + des größten Gewichts im Gewichtssatz, weil das die Spanne aller sinnvollen Zielgewichte ist. Man muss leider über das größte Zielgewicht hinausgehen, da es Lösungen geben kann, bei denen von einem größeren Gewicht wieder etwas abgezogen wurde (&rarr; zwei Seiten der Waage).
-3. In der dritten Dimension wird repräsentiert, wie viele Gewichte für die Lösung gebraucht wurden, sie ist also so lang wie der Gewichtssatz. Bei den Indizes werden 0 oder 1 eingetragen, eine 1 bedeutet, dass das Zielgewicht mit dem Index entsprechend vielen Gewichten ausgleichbar ist.
-
-Dieses Konzept setze ich in [Typescript](https://www.typescriptlang.org/) mit der Laufzeit [Deno](https://deno.land/) um. Ich schreibe wegen einer besseren Lesbarkeit auf Englisch, da Typescript selbst englischbasiert ist.
+Das setze ich in [Typescript](https://www.typescriptlang.org/) mit der Laufzeit [Deno](https://deno.land/) um. Ich schreibe wegen einer besseren Lesbarkeit auf Englisch, da Typescript selbst englischbasiert ist.
 
 Das Einlesen und die Umwandlung der Textdateien sowie die Vorbereitung für die Ausgabe im Terminal übernehmen die zwei Funktionen `convertInput()` und `convertOutput()`, allerdings enthalten sie keine Logik zur Bestimmung passender Gewichte.
 
-In `main.ts` werden alle nötigen Funktionen für Zielgewicht (10, 20, ..., 10 000) aufgerufen,  die aber in `calculations.ts` stehen. Folgende Berechnungen gescehen in [`nearestCombination()`](###nearestCombination).
+Alle Funktionen, die Daten umwandeln oder untersuchen, stehen in der Datei `calculations.ts`, Ein- und Ausgabe geschieht in `main.ts`.
 
-### Basisfälle
+### Erstellung der Tabelle
 
-Zuerst wird der oben angesprochene Fall eines Zielgewichts von 0 überprüft (Z. 7 - 11), bei dem sofort eine genau passende Gewichtskombination (`diff = target = 0`) zurückgegeben werden kann. Wenn keine Gewichte zum Ausgleichen vorhanden sind, sind keine weiteren Berechnungen möglich, folglich ist der Abstand zum anfänglichen Zielgewicht das verbleibende Zielgewicht.
+Die zugrundeliegende Struktur, um für jeden Teilgewichtssatz alle erreichbaren Zielgewichte abzuspeichern, ist eine Liste an Sets. Ich nenne sie *Tabelle*, weil sie grafisch einer ähnelt. Ich benutze ein Set anstatt eines normalen Arrays für die zweite Listenebene, damit kein Zielgewicht doppelt abgespeichert wird.
 
-### Rekursion
+Die zuständige Funktion [`createTable()`](###createTable) hat als Parameter den Gewichtssatz und optional das maximale gewünschte Zielgewicht, das normalerweise bei 10000 liegt (Z. 1 - 4).
 
-Jedes zum Ausgleichen vorhandene Gewicht wird zum aktuellen Zielgewicht addiert und subtrahiert, mit diesen neu entstandenen Zielgewichten wird die gesamte Funktion erneut aufgerufen (Z. 21 - 54).
+Zuerst wird eine Liste der Länge des Gewichtssatzes + 1 mit leeren Sets initialisiert (Z. 5 - 7), weil für jedes Unterarray des Gewichtssatzes $[ \space gewicht_i, \space gewicht_{i+1}, \space ..., \space gewicht_n \space] \newline$  (n: Länge des Gewichtssatzes) und aber auch den leeren Gewichtssatz $[ \space ]$ alle ausgleichbaren Zielgewichte abgespeichert werden sollen.
 
-Dazu wird zunächst eine aktualisierte Version der Liste von benutzbaren Gewichten (`shortenedWeights`) erstellt (Z. 22 - 24), da das eben addierte (&rarr; linke Seite der Waage) oder subtrahierte (&rarr; rechte Seite) Gewicht nicht mehr zum Ausgleichen vorhanden ist. Auch wird die Liste der benutzten Gewichte um das gerade eben benutzte erweitert und an die nächste Funktion weitergegeben.
+Mit dem leeren Gewichtssatz ist nur das Zielgewicht 0 ausgleichbar, was als Startwert manuell hinzugefügt wird (Z. 10). Das Auffüllen der Tabelle baut auf diesem Wert auf.
 
-Die Variablen `added` und `subtracted` speichern die bestmögliche Gewichtskombination zum Erreichen des Zielgewichts nach Addition bzw. Subtraktion. Diese werden mit der aktuellen `bestCombination` hinsichtlich ihrer Differenz zum Zielgewicht als auch der Anzahl an benutzten Gewichten durch [`determineBest()`](###determineBest()) verglichen (Z. 45 - 54). Die Differenz hat Priorität, bei beiden Kriterien wird ein möglichst kleiner Wert bevorzugt. `bestCombination` ist gewichtsübergreifend, (&rarr; nicht im Rahmen des for-loops) und wird laufend mit der passendsten und kürzesten Gewichtskombination aktualisiert.
+Dieser Vorgang geschieht in zwei verschachtelten for-loops (Z. 13 - 21):
 
-### Rückgabe
+1. Iteration durch die Liste an Sets (von hinten nach vorne), bzw. den Gewichtssatz
 
-Falls durch Austesten aller Gewichte keine passende Lösung gefunden worden ist, wird die nähste zurückgegeben (Z. 63). Die Funktion gibt eine genau passende Lösung aber schon während des Testens zurück, um unnötige Berechnungen zu vermeiden (Z. 56 - 60). Eine Lösung ( &rarr; [Typ Gewichtskombination](###type%20weightCombination)) besteht aus dem Unterschied zum Zielgewichts und den zuvor aggregierten Gewichten, die zum Erreichen der Lösung beitragen.
+   &rarr; aktuelles Gewicht: `weight`, aktuelles Set: `table[i]`
 
-`convertOutput()` wandelt diese in ein gut lesbares Format um, damit sie im Terminal ausgegeben werden kann.
+2. Iteration durch die erreichbaren Zielgewichte im *vorherigen* Set
 
-### Laufzeitverbesserungen
+   &rarr; aktuelles Zielgewicht: `v`
 
-Ich habe einige Abschnitte bis jetzt nicht behandelt  (z.B. Z. 13-14, 30), weil die Funktion ohne sie richtig arbeiten würde, allerdings sehr ineffizient (exponentielle Zeitkomplexität). Daher habe ich (neben frühzeitiger Rückgabe) drei Maßnahmen zum Umgehen irrelevanter Berechnungen eingebaut.
+Zunächst wird `v` dem aktuellen Set hinzugefügt, weil die Menge aller möglichen Zielgewichte mit einem zusätzlichen Gewicht die Menge aller möglichen Zielgewichte ohne dieses enthält (Z. 16).
+$$
+table[i + 1] \subseteq table[i]
+$$
+Dann wird geprüft, ob die Summe aus dem aktuellen Gewicht und Zielgewicht in dem Bereich $0 \space bis \space Zielgewicht_{max} + Gewicht_{max}$ liegt, was der minimal mögliche Bereich ist, in dem alle relevanten Zielgewichte errechnet werden können. Ist das der Fall, wird diese Summe dem aktuellen Set hinzugefügt (Z. 18 - 19).
 
-1. Memoisation (Zwischenspeicherung) von Teillösungen
-2. keine gleichzeitige Addition und Subtraktion der gleichen Gewichtsgröße
-3. keine Kalkulation, wenn $0 > target_{neu} > 10000 + weight_{max}$
+### Suche nach der nähsten Lösung
 
-#### Memoisation
+Für jedes Gewicht im Bereich 10 bis 10000 mit Schrittweite 10 wird die Funktion [`findNearest()`](###findNearest()), aufgerufen, die anhand des Gewichtssatzes und der daraus erstellten Tabelle eine dem eigentlichen Zielgewicht möglichst nahe Lösung sucht. Dazu wird [`searchTable()`](###searchTable()) mit dem Zielgewicht $\pm$ `d` aufgerufen, wobei `d` (für Delta) zunächst 0 ist und dann erhöht wird (Z. 6 - 8). Beim ersten Auftauchen einer Lösung wird diese zurückgegeben (Z. 10 - 12) und in `main.ts` nach Umwandlung durch `convertOutput()` in ein gut lesbares Format im Terminal ausgegeben.
 
-Die Memoisation realisiere ich durch `memo`, ein JavaScript Objekt mit dem [Typ `weightMemo`](###type%20weightMemo), das an alle Unteraufrufe weitergegeben wird. Damit ergibt sich ein dritter Basisfall, der eintritt, wenn die Kombination aus gesuchtem Gewicht und vorhandenen Gewichten bereits berechnet worden ist.
+Die eigentliche Durchsuchung der Tabelle geschieht in der Funktion [`searchTable()`](###searchTable()), die rekursiv die für das Zielgewicht benötigten Gewichte sammelt.
+
+Wenn der Basisfall eines Zielgewichts von 0 eintritt, wird eine leere Liste zurückgegeben, da zum Ausgleichen von 0 kein Gewicht nötig ist (Z. 6).
+
+In jedem anderen Fall wird die Tabelle von hinten nach vorne durchgegangen, bis ein Set das gewünschte Gewicht enthält, es also ausgleichbar ist (Z. 8 - 13). Das gerade neu hinzugekommene Gewicht muss an der Lösung beteiligt gewesen sein, weil sie zuvor (ohne das Gewicht) nicht erschien. Zur Erinnerung: Bei der Erstellung der Tabelle wurde die Liste verfügbarer Gewichte schrittweise von hinten erweitert. Daher wird die Funktion erneut mit dem Zielgewicht, verringert um das relevante Gewicht, aufgerufen. Nachdem eine Lösung erhalten worden ist, wird das subtrahierte Gewicht angefügt und diese weitergegeben.
+
+Wenn sich in der gesamten Tabelle keine Lösung befindet wird `undefined` zurückgegeben (Z. 14), das von aufrufenden Funktionen einfach weitergegeben wird.
 
 ## Beispiele
 
@@ -3560,107 +3560,70 @@ Weil die Ausgabe bei großen Zielgewichten sehr lang ist, habe ich mich auf 10g 
 
 ## Quellcode
 
-### nearestCombination()
+### createTable()
 
 ```typescript
-const nearestCombination = (
-	target: number,
-	usableWeights: Array<number>,
-	memo: weightMemo = {},
-	usedWeights: Array<number> = []
-): weightCombination => {
-	if (target === 0 || usableWeights.length === 0)
-		return {
-			diff: target,
-			usedWeights: usedWeights
-		};
+const createTable = (
+	weights: Array<number>,
+	maxTarget = 10000
+): Array<Set<number>> => {
+	const table: Array<Set<number>> = new Array(weights.length + 1)
+		.fill(0)
+		.map(() => new Set());
 
-	const memoKey = `${target}:${usableWeights.toString()}`;
-	if (memoKey in memo) return memo[memoKey];
+	// Seed: target 0 is reachable with 0 weights available
+	table[weights.length].add(0);
+	const maxWeight = weights[weights.length - 1];
 
-	let bestCombination: weightCombination = {
-		diff: target,
-		usedWeights: []
-	};
+	for (let i = weights.length - 1; i >= 0; i--) {
+		const weight = weights[i];
+		for (const v of table[i + 1].values()) {
+			table[i].add(v);
 
-	for (const weight of usableWeights) {
-		// Make a true copy, not only a reference copy
-		const shortenedWeights = [...usableWeights];
-		shortenedWeights.splice(usableWeights.indexOf(weight), 1);
-
-		// Ensure weights of equal size only to be on one side
-		// 0 <= new target <= 10000 + biggest weight
-
-		const subtracted =
-			!usedWeights.includes(weight) && target - weight >= 0
-				? nearestCombination(target - weight, shortenedWeights, memo, [
-						...usedWeights,
-						-weight
-				  ])
-				: undefined;
-		const added =
-			!usedWeights.includes(-weight) &&
-			target + weight <= 10000 + usableWeights[usableWeights.length - 1]
-				? nearestCombination(target + weight, shortenedWeights, memo, [
-						...usedWeights,
-						weight
-				  ])
-				: undefined;
-
-		bestCombination = determineBest(
-			bestCombination,
-			...(added !== undefined
-				? subtracted !== undefined
-					? [added, subtracted]
-					: [added]
-				: subtracted !== undefined
-				? [subtracted]
-				: [])
-		);
-
-		// Early return if a matching combination is found
-		if (bestCombination.diff === 0) {
-			memo[memoKey] = bestCombination;
-			return bestCombination;
+			if (v + weight > 0 && v + weight < maxTarget + maxWeight)
+				table[i].add(v + weight);
 		}
 	}
-	memo[memoKey] = bestCombination;
-	return bestCombination;
+	return table;
 };
 ```
 
-### determineBest()
+### searchTable()
 
 ```typescript
-const determineBest = (
-	combinations: Array<weightCombination>
-): weightCombination => {
-	return combinations.sort((a, b) => {
-		// Make negative values positive for comparison
-		a.diff = a.diff < 0 ? a.diff * -1 : a.diff;
-		b.diff = b.diff < 0 ? b.diff * -1 : b.diff;
+const searchTable = (
+	target: number,
+	weights: Array<number>,
+	table: Array<Set<number>>
+): Array<number> | undefined => {
+	if (target === 0) return [];
 
-		if (a.diff === b.diff)
-			return a.usedWeights.length - b.usedWeights.length;
-		return a.diff - b.diff;
-	})[0];
+	for (let i = table.length - 1; i >= 0; i--) {
+		if (table[i].has(target)) {
+			const next = searchTable(target - weights[i], weights, table);
+			return next === undefined ? next : [...next, -weights[i]];
+		}
+	}
+	return undefined;
 };
 ```
 
-### type weightCombination
+### findNearest()
 
 ```typescript
-type weightCombination = {
-	diff: number;
-	usedWeights: Array<number>;
-};
-```
+const findNearest = (
+	target: number,
+	usableWeights: Array<number>,
+	table: Array<Set<number>>
+): [number, Array<number>] | undefined => {
+	for (let d = 0; d < target; d++) {
+		const higher = searchTable(target + d, usableWeights, table);
+		const lower = searchTable(target - d, usableWeights, table);
 
-### type weightMemo
-
-```typescript
-type weightMemo = {
-	[key: string]: weightCombination;
+		if (higher !== undefined || lower !== undefined) {
+			return [d, higher !== undefined ? higher : lower!];
+		}
+	}
 };
 ```
 

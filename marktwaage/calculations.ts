@@ -22,7 +22,22 @@ export const createTable = (
 	return table;
 };
 
-export const searchTable = (
+export const findNearest = (
+	target: number,
+	usableWeights: Array<number>,
+	table: Array<Set<number>>
+): [number, Array<number>] | undefined => {
+	for (let d = 0; d < target; d++) {
+		const higher = searchTable(target + d, usableWeights, table);
+		const lower = searchTable(target - d, usableWeights, table);
+
+		if (higher !== undefined || lower !== undefined) {
+			return [d, higher !== undefined ? higher : lower!];
+		}
+	}
+};
+
+const searchTable = (
 	target: number,
 	weights: Array<number>,
 	table: Array<Set<number>>
@@ -32,7 +47,7 @@ export const searchTable = (
 	for (let i = table.length - 1; i >= 0; i--) {
 		if (table[i].has(target)) {
 			const next = searchTable(target - weights[i], weights, table);
-			return next === undefined ? next : [...next, -weights[i]];
+			return next === undefined ? next : [...next, weights[i]];
 		}
 	}
 	return undefined;
@@ -58,8 +73,8 @@ export const convertOutput = (
 	diff: number,
 	usedWeights: Array<number>
 ): string => {
-	const left = usedWeights.filter((weight) => weight > 0);
-	const right = usedWeights
+	const right = usedWeights.filter((weight) => weight > 0);
+	const left = usedWeights
 		.filter((weight) => weight < 0)
 		.map((weight) => -weight);
 

@@ -2,7 +2,7 @@ import {
 	convertInput,
 	convertOutput,
 	createTable,
-	searchTable
+	findNearest
 } from "./calculations.ts";
 
 const szenarios = 7;
@@ -18,21 +18,8 @@ for (let i = 0; i < szenarios; i++) {
 	const table = createTable(usableWeights);
 
 	for (let target = 10; target < 10010; target += 10) {
-		// Search for the closest solution
-		for (let d = 0; d < target; d++) {
-			const higher = searchTable(target + d, usableWeights, table);
-			const lower = searchTable(target - d, usableWeights, table);
-
-			if (higher !== undefined || lower !== undefined) {
-				console.log(
-					convertOutput(
-						target,
-						d,
-						higher !== undefined ? higher : lower!
-					)
-				);
-				break;
-			}
-		}
+		console.log(
+			convertOutput(target, ...findNearest(target, usableWeights, table)!)
+		);
 	}
 }
