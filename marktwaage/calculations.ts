@@ -1,5 +1,3 @@
-import { weightCombination } from "./types.ts";
-
 export const createTable = (
 	weights: Array<number>,
 	maxTarget = 10000
@@ -57,14 +55,15 @@ export const convertInput = (textFile: string): Array<number> => {
 
 export const convertOutput = (
 	target: number,
-	combination: weightCombination
+	diff: number,
+	usedWeights: Array<number>
 ): string => {
-	const left = combination.usedWeights.filter((weight) => weight > 0);
-	const right = combination.usedWeights
+	const left = usedWeights.filter((weight) => weight > 0);
+	const right = usedWeights
 		.filter((weight) => weight < 0)
 		.map((weight) => -weight);
 
-	if (combination.diff === 0) {
+	if (diff === 0) {
 		return `${target}g: Ausgleich möglich!	
 	Links: ${left.join(", ")}
 	Rechts: ${right.join(", ")}
@@ -72,7 +71,7 @@ export const convertOutput = (
 	}
 
 	return `${target}g: Ausgleich nicht möglich.
-	Differenz: ${combination.diff}
+	Differenz: ${diff}
 	Links: ${left.join(", ")}
 	Rechts: ${right.join(", ")}
 	`;

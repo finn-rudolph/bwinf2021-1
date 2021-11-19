@@ -25,10 +25,11 @@ for (let i = 0; i < szenarios; i++) {
 
 			if (higher !== undefined || lower !== undefined) {
 				console.log(
-					convertOutput(target, {
-						diff: d,
-						usedWeights: higher !== undefined ? higher : lower!
-					})
+					convertOutput(
+						target,
+						d,
+						higher !== undefined ? higher : lower!
+					)
 				);
 				break;
 			}
