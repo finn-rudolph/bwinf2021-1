@@ -1,6 +1,6 @@
 # Bundeswettbewerb Informatik 2021
 
-Meine Lösungen für die drei Aufgaben *Schiebeparkplatz*, *Vollgeladen* und *Marktwaage* des [BWINF](https://bwinf.de/) 2021 und deren Dokumentation.
+Meine Lösungen für die drei Aufgaben _Schiebeparkplatz_, _Vollgeladen_ und _Marktwaage_ des [BWINF](https://bwinf.de/) 2021 und deren Dokumentation.
 
 ## Ausführung
 
@@ -10,6 +10,12 @@ Die einzelnen Lösungen können durch folgenden Befehl im Projektordner ausgefü
 
 ```
 deno run --allow-read <Name der Aufgabe>/main.ts
+```
+
+Beispiel für _Marktwaage_:
+
+```
+deno run --allow-read marktwaage/main.ts
 ```
 
 ## Dokumentation
