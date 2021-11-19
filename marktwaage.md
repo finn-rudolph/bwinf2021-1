@@ -1,4 +1,15 @@
-# Marktwaage
+
+
+<h1 style="text-align: center"> Aufgabe 5: Marktwaage </h1>
+<p style="text-align: center">Team-ID: 00968 </p>
+<p style="text-align: center">Teamname & Bearbeiter: Finn Rudolph </p>
+<p style="text-align: center">19.11.2021 </p>
+
+<h2>Inhaltsverzeichnis</h2>
+
+[TOC]
+
+
 
 ## Lösungsidee
 
@@ -59,13 +70,13 @@ Das setze ich in [Typescript](https://www.typescriptlang.org/) mit der Laufzeit 
 
 Das Einlesen und die Umwandlung der Textdateien sowie die Vorbereitung für die Ausgabe im Terminal übernehmen die zwei Funktionen `convertInput()` und `convertOutput()`, allerdings enthalten sie keine Logik zur Bestimmung passender Gewichte.
 
-Alle Funktionen, die Daten umwandeln oder untersuchen, stehen in der Datei `calculations.ts`, Ein- und Ausgabe geschieht in `main.ts`.
+**Dateienstruktur**: Alle Funktionen, die Daten umwandeln oder untersuchen, stehen in der Datei `calculations.ts`, Ein- und Ausgabe geschieht in `main.ts`.
 
 ### Erstellung der Tabelle
 
 Die zugrundeliegende Struktur, um für jeden Teilgewichtssatz alle erreichbaren Zielgewichte abzuspeichern, ist eine Liste an Sets. Ich nenne sie *Tabelle*, weil sie grafisch einer ähnelt. Ich benutze ein Set anstatt eines normalen Arrays für die zweite Listenebene, damit kein Zielgewicht doppelt abgespeichert wird.
 
-Die zuständige Funktion [`createTable()`](###createTable) hat als Parameter den Gewichtssatz und optional das maximale gewünschte Zielgewicht, das normalerweise bei 10000 liegt (Z. 1 - 4).
+Die zuständige Funktion [`createTable()`](###createTable()) hat als Parameter den Gewichtssatz und optional das maximale gewünschte Zielgewicht, das normalerweise bei 10000 liegt (Z. 1 - 4).
 
 Zuerst wird eine Liste der Länge des Gewichtssatzes + 1 mit leeren Sets initialisiert (Z. 5 - 7), weil für jedes Unterarray des Gewichtssatzes $[ \space gewicht_i, \space gewicht_{i+1}, \space ..., \space gewicht_n \space] \newline$  (n: Länge des Gewichtssatzes) und aber auch den leeren Gewichtssatz $[ \space ]$ alle ausgleichbaren Zielgewichte abgespeichert werden sollen.
 
@@ -79,7 +90,7 @@ Dieser Vorgang geschieht in zwei verschachtelten for-loops (Z. 13 - 21):
 
 2. Iteration durch die erreichbaren Zielgewichte im *vorherigen* Set
 
-   &rarr; aktuelles Zielgewicht: `v`
+   &rarr; aktuelles vorheriges Zielgewicht: `v`
 
 Zunächst wird `v` dem aktuellen Set hinzugefügt, weil die Menge aller möglichen Zielgewichte mit einem zusätzlichen Gewicht die Menge aller möglichen Zielgewichte ohne dieses enthält (Z. 16).
 $$
@@ -89,7 +100,7 @@ Dann wird geprüft, ob die Summe aus dem aktuellen Gewicht und Zielgewicht in de
 
 ### Suche nach der nähsten Lösung
 
-Für jedes Gewicht im Bereich 10 bis 10000 mit Schrittweite 10 wird die Funktion [`findNearest()`](###findNearest()), aufgerufen, die anhand des Gewichtssatzes und der daraus erstellten Tabelle eine dem eigentlichen Zielgewicht möglichst nahe Lösung sucht. Dazu wird [`searchTable()`](###searchTable()) mit dem Zielgewicht $\pm$ `d` aufgerufen, wobei `d` (für Delta) zunächst 0 ist und dann erhöht wird (Z. 6 - 8). Beim ersten Auftauchen einer Lösung wird diese zurückgegeben (Z. 10 - 12) und in `main.ts` nach Umwandlung durch `convertOutput()` in ein gut lesbares Format im Terminal ausgegeben.
+Für jedes Gewicht im Bereich 10 bis 10000 mit Schrittweite 10 wird die Funktion [`findNearest()`](###findNearest()), aufgerufen, die anhand des Gewichtssatzes und der daraus erstellten Tabelle eine dem eigentlichen Zielgewicht möglichst nahe Lösung sucht. Dazu wird [`searchTable()`](###searchTable()) mit dem Zielgewicht $\pm$ `d` aufgerufen, wobei `d` (für Delta) zunächst 0 ist und dann erhöht wird (findNearest, Z. 6 - 8). Beim ersten Auftauchen einer Lösung wird diese zurückgegeben (findNearest, Z. 10 - 12) und in `main.ts` nach Umwandlung durch `convertOutput()` in ein gut lesbares Format im Terminal ausgegeben.
 
 Die eigentliche Durchsuchung der Tabelle geschieht in der Funktion [`searchTable()`](###searchTable()), die rekursiv die für das Zielgewicht benötigten Gewichte sammelt.
 
@@ -100,6 +111,10 @@ In jedem anderen Fall wird die Tabelle von hinten nach vorne durchgegangen, bis 
 Wenn sich in der gesamten Tabelle keine Lösung befindet wird `undefined` zurückgegeben (Z. 14), das von aufrufenden Funktionen einfach weitergegeben wird.
 
 ## Beispiele
+
+*gewichtsstuecke0* bis *gewichtsstuecke5* sind die [Beispiele der bwinf-Seite](https://bwinf.de/bundeswettbewerb/40/1/), während *gewichtsstuecke6* selbst ausgedacht ist. In der Vorlage stand, man solle hier keine 30 Seiten Programmausgabe einfügen, allerdings ist die Ausgabe etwas länger, wenn ich alle geforderten Lösungen (10g bis 500g und 9500g bis 10000g) angebe und noch ein eigenes Beispiel hinzufüge.
+
+Wenn man nur die Ausgabe eines Beispiels sehen möchte oder nur einen bestimmten Gewichtsbereich, lässt sich das in `main.ts` über den Startwert von `i`, die `szenarios`-Konstante bzw. den Startwert von `target` und die Abbruchbedingung einstellen.
 
 ### gewichtsstuecke0
 

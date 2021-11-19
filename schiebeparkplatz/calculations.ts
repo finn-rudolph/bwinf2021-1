@@ -99,7 +99,7 @@ export const locateObstructing = (
 };
 
 /* Criteria:
-	1. existence
+	1. possibility to park out
 	2. fewest cars shifted
 	3. fewest positions shifted
 */

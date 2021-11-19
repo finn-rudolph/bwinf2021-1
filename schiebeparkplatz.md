@@ -1,4 +1,13 @@
-# Schiebeparkplatz
+<h1 style="text-align: center"> Aufgabe 1: Schiebeparkplatz </h1>
+<p style="text-align: center">Team-ID: 00968 </p>
+<p style="text-align: center">Teamname & Bearbeiter: Finn Rudolph </p>
+<p style="text-align: center">19.11.2021 </p>
+
+<h2>Inhaltsverzeichnis</h2>
+
+[TOC]
+
+
 
 ## Lösungsidee
 
@@ -6,12 +15,12 @@ Ich bezeichne die auszuparkenden Autos als *vertikal* und die blockierenden Auto
 
 Für das Ausparken eines vertikal stehenden Autos ist zunächst nur das direkt davorstehende horizontale Auto relevant. Nur wenn Ausparken durch dessen Verschiebung nicht möglich ist, werden die zwei benachbarten relevant.
 
-Da die Verschiebung von horizontalen Autos für eine Lösung nur in eine Richtung geschieht, lässt sich das Problem des Verschiebens in zwei einfache Probleme aufteilen:
+Da die Verschiebung von horizontalen Autos für eine Lösung nur in eine Richtung geschieht, lässt sich das Problem in zwei einfache Probleme aufteilen:
 
-- Wie viele Autos müssen nach links verschoben werden?
-- Wie viele Autos müssen nach rechts verschoben werden?
+- Verschiebung nach links
+- Verschiebung nach rechts
 
-Die nötigen Positionsverschiebungen eines störenden horizontalen Autos zum Ausparken des vertikalen Autos lassen sich folgenderweise beschreiben:
+Wie oft ein störendes horizontales Autos zum Ausparken des vertikalen Autos verschoben werden muss, lässt sich folgenderweise beschreiben:
 $$
 nach \space Links: Position_{Horizontal} - Position_{Vertikal} + 2 \\ 
 nach \space Rechts: Position_{Vertikal} - Position_{Horizontal} + 1
@@ -52,39 +61,41 @@ flowchart TB
 
 Ich schreibe in [Typescript](https://www.typescriptlang.org/) und benutze die Laufzeit [Deno](https://deno.land/).
 
-Ein Parkplatz wird durch `convertInput()` eingelesen, die Anweisungen zum Ausparken durch `convertOutput()` für die Ausgabe im Terminal arrangiert. Da die beiden aber keine Logik zur Bestimmung der Schiebeschritte enthalten, gehe ich nicht näher auf sie ein.
+Ein Parkplatz wird durch `convertInput()` eingelesen, die Anweisungen zum Ausparken durch `convertOutput()` für die Ausgabe im Terminal in das entsprechende Format gebracht. Da die beiden aber keine Logik zur Bestimmung der Schiebeschritte enthalten, gehe ich nicht näher auf sie ein.
 
-Die nötigen Funktionsaufrufe geschehen in `main.ts`, während die Funktionen selbst in `calculations.ts` geschrieben sind. Die im Folgenden beschriebenen Schritte beziehen sich auf ein vertikales Auto, sie werden natürlich für jedes durchgeführt.
+**Dateienstruktur**: Die Aufrufe der Funktionen, die die einzelnen Berechnungsschritte durchführen, geschehen in `main.ts`, während die Funktionen selbst in `calculations.ts` geschrieben sind. 
+
+`convertInput()` gibt eine Liste an horizontalen Autos ([Typ `horizontalCar`](###type horizontalCar)) und vertikalen Autos (Typ `Array<string>`) zurück. Die im Folgenden beschriebenen Schritte beziehen sich auf ein vertikales Auto, sie werden für jedes durchgeführt.
 
 ### Bestimmung des blockierenden Autos
 
-[locateObstructing()](###locateObstructing()) vergleicht die Position des vertikalen Autos (`carIndex`) mit den Positionen der horiziontalen Autos und gibt bei Überschneidungen das störende Auto zurück. Die folgenden Schritte geschehen nicht, falls die Rückgabe `undefined` ist, was signalisiert, dass kein Auto im Weg steht.
+[`locateObstructing()`](###locateObstructing()) vergleicht die Position des vertikalen Autos (`carIndex`) mit den Positionen der horiziontalen Autos und gibt bei Überschneidungen das störende Auto zurück. Die folgenden Schritte geschehen nicht, falls die Rückgabe `undefined` ist, was signalisiert, dass kein Auto im Weg steht.
 
 ### Verschiebung in beide Richtungen
 
-Die Funktion wird für jedes vertikale Auto zweimal aufgerufen: Schieberichtung links und rechts.
+[`shiftHorizontal()`](###shiftHorizontal()) wird für jedes vertikale Auto zweimal aufgerufen: Schieberichtung links und rechts. Die Funktion prüft rekursiv den Abstand zum nächsten Auto und gibt eine Liste an nötigen [Verschiebungsanweisungen](###type shiftStep) zurück. 
 
-[`shiftHorizontal()`](###shiftHorizontal()) prüft rekursiv den Abstand zum nächsten Auto und gibt eine Liste an nötigen [Verschiebungsanweisungen](###type%20shiftStep) zurück. Die beiden Wände / Parkplatzenden werden als unverschiebbare horizontale Autos gehandhabt.
+In `convertInput()` ist an den Anfang und an das Ende der Liste horizontaler Autos jeweils ein weiteres Element hinzugefügt worden, das das jeweilige Parkplatzende darstellt. Der verwendete Name ist `"wall"`.
 
 #### Basisfälle
 
-Das Verschieben war erfolgreich, wenn keine nötigen Verschiebungen mehr übrig sind. In diesem Fall wird die Liste, in die von den aufrufenden Funktionen Verschiebungsschritte hinzugefügt werden, zurückgegeben (Z. 7). Falls versucht wird, eine `"wall"`, das Parkplatzende, zu verschieben, ist das Ausparken nicht möglich (Z. 8).
+Das Verschieben ist erfolgreich, wenn keine nötigen Verschiebungen mehr übrig sind. In diesem Fall wird eine leere Liste zurückgegeben (Z. 7), die von aufrufenden Funktionen mit Verschiebungsanweisungen befüllt wird. Falls versucht wird, eine `"wall"`, das Parkplatzende, zu verschieben, ist das Ausparken nicht möglich (Z. 8). 
 
 #### Rekursion 
 
 Das nächste zu verschiebende Auto ist abhängig von der gegebenen Schieberichtung, es ist entweder das vorige oder nächste Listenelement in der Liste aller horizontalen Autos (Z. 10 - 11).
 
-Für den nächsten Aufruf ist die Distanz zum nächsten Auto erforderlich, da dieses um die Distanz *weniger* verschoben werden muss (Z. 13 - 16). Der Subtrahend ist natürlich richtungsabhängig, außerdem muss die Länge von 2 eines Autos beachtet werden. `furtherShifts` speichert die Verschiebungsschritte aller weiteren Autos, die durch den rekursiven Funktionsaufruf zurückgegeben werden (Z. 18 - 23).
+Für den nächsten Aufruf ist die Distanz zum nächsten Auto erforderlich, da dieses um die Distanz *weniger* verschoben werden muss (Z. 13 - 16). Der Subtrahend ist natürlich richtungsabhängig, außerdem muss die Länge eines Autos von 2 Plätzen beachtet werden. `furtherShifts` speichert die Verschiebungsschritte aller weiteren Autos, die durch den rekursiven Funktionsaufruf zurückgegeben werden (Z. 18 - 23).
 
 #### Rückgabe
 
 `undefined` tritt auf, wenn das Ausparken durch Verschiebung horizontaler Autos in die gegebene Richtung nicht möglich ist, es wird einfach weitergegeben (Z. 25).
 
-Wenn die Funktion eine Liste erhält, sind dort die weiteren [Verschiebungsanweisungen](###type%20shiftStep) gespeichert. Nach Hinzufügen der hier getätigten Verschiebung wird diese Liste weitergegeben (Z. 27 - 33).
+Wenn die Funktion eine Liste erhält, sind dort die weiteren [Verschiebungsanweisungen](###type shiftStep) gespeichert. Nach Hinzufügen der hier getätigten Verschiebung wird diese Liste weitergegeben (Z. 27 - 33).
 
 ### Vergleich der Verschiebungsmöglichkeiten
 
-[`determineBest()`](###determineBest()) vergleicht die Verschiebung nach links und rechts nach folgenden Kriterien :
+[`determineBest()`](###determineBest()) vergleicht die Verschiebung nach links und rechts nach folgenden Kriterien:
 
 1. Möglichkeit des Ausparkens
 2. Geringere Anzahl an verschobenen Autos
@@ -299,7 +310,7 @@ E: Ausparken nicht möglich
 F: Ausparken nicht möglich
 ```
 
-In diesem Beispiel kann kein Auto ausparken, weil die drei davorstehenden alle sechs Plätze einnehmen und damit unverschiebbar sind.
+In diesem Beispiel kann kein Auto ausparken, weil die drei davorstehenden Autos alle sechs Plätze einnehmen und damit unverschiebbar sind.
 
 ### parkplatz8
 
@@ -415,7 +426,7 @@ const determineBest = (
 type horizontalCar = {
 	name: string;
 	position: number;
-};A
+};
 ```
 
 ### type shiftStep

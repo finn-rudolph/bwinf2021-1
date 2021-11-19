@@ -1,20 +1,28 @@
-# Hotels
+<h1 style="text-align: center"> Aufgabe 2: Vollgeladen </h1>
+<p style="text-align: center">Team-ID: 00968 </p>
+<p style="text-align: center">Teamname & Bearbeiter: Finn Rudolph </p>
+<p style="text-align: center">19.11.2021 </p>
+
+<h2>Inhaltsverzeichnis</h2>
+
+[TOC]
+
+
 
 ## Lösungsidee
 
 Zuerst sollen alle Hotels mit einer besseren Alternative bei gleicher Minutenzahl und die hinter dem Ziel aussortiert werden.
 
-In einer Liste wird für jedes Hotel eine Liste aller Möglichkeiten, es zu erreichen, abgespeichert. Daher ergibt sich eine dreidimensionale Liste, weil jede Möglichkeit eine Liste von Hotels ist. Zunächst werden alle vom Start erreichbaren Hotels mit einer leeren zweidimensionalen Liste initialisiert, um anzuzeigen, dass eine Möglichkeit vorhanden ist, das Hotel zu erreichen und keine Hotels dafür benötigt werden. Danach wird für jedes Hotel die Liste an Möglichkeiten, es zu erreichen, allen Hotels innerhalb der nächsten 360 Minuten hinzugefügt. Zuvor wird jede Möglichkeit aber um das aktuelle Hotel ergänzt, weil in diesem Hotel übernachtet werden muss, um die darauffolgenden zu erreichen.
+In einer Liste wird für jedes Hotel eine Liste aller Möglichkeiten, es zu erreichen, abgespeichert. Es ergibt sich eine dreidimensionale Liste, weil jede Möglichkeit wiederum eine Liste von Hotels ist. Zunächst werden alle vom Start erreichbaren Hotels mit einer leeren zweidimensionalen Liste initialisiert, um anzuzeigen, dass eine Möglichkeit vorhanden ist, das Hotel zu erreichen und keine Hotels dafür benötigt werden. Danach wird für jedes Hotel die Liste an Möglichkeiten, es zu erreichen, allen Hotels innerhalb der nächsten 360 Minuten hinzugefügt. Zuvor wird jede Möglichkeit aber um das aktuelle Hotel ergänzt, weil in diesem Hotel übernachtet werden muss, um die darauffolgenden zu erreichen.
 
-Zwei Einschränkungen gibt es: 
+Es gibt allerdings zwei Einschränkungen, unter denen eine Route (&rarr; Liste an Hotels) weiteren Hotels hinzugefügt wird: 
 
 1. Wenn bei dem Zielhotel bereits eine Möglichkeit vorhanden ist, es mit einer höheren kleinsten Bewertung zu erreichen, während die gleiche / geringere Anzahl an Hotels benötigt wird, soll die betreffende Möglichkeit nicht hinzugefügt werden. Andernfalls soll sie alle mit gleich vielen / mehr Zwischenstopps ersetzen, die eine schlechtere / gleiche Bewertung haben. Das bedeutet, es werden pro Hotel maximal 5 Möglichkeiten gleichzeitig existieren.
 
-2. Eine Reiseroute ist nur zielführend, wenn pro verbleibendem Tag durchschnittlich weniger als 360 Minuten zu fahren sind. 
+2. Eine Reiseroute ist nur zielführend, wenn pro verbleibendem Tag durchschnittlich weniger als 360 Minuten zu fahren sind.
 
-   &rarr; Andernfalls wird diese Möglichkeit nicht fortgeführt. 
 
-Nachdem das für jedes Hotel geschehen ist, wird die beste Fahrtmöglichkeit durch Vergleich aller Möglichkeiten am Ziel ermittelt.
+Nachdem das für je3des Hotel geschehen ist, wird die beste Fahrtmöglichkeit durch Vergleich aller Möglichkeiten am Ziel ermittelt.
 
 Beispiel:
 
@@ -24,8 +32,8 @@ flowchart LR
 
 s(Start)---h1(20min, 3.5*)---h2(300 min, 4.0*)---h3(540min, 4.8*)---z(Ziel: 600 min)
 
-s -->|Seed| m1
-s -->|Seed| m2
+s --> m1
+s --> m2
 
 h1
 m1("[ [ ] ]")
@@ -46,19 +54,21 @@ m4("[ [ { 300min, 4.0* } ]")
 
 
 
-*durchgezogen*: Hinzufügen einer Möglichkeit; *gepunktet*: Hinzufügen wäre möglich, allerdings ist bereits eine bessere Möglichkeit vorhanden
+**durchgezogen**: Hinzufügen einer neuen Route
+
+**gepunktet**: Hinzufügen wäre möglich, allerdings ist bereits eine bessere Route vorhanden
 
 ## Umsetzung
 
 Ich schreibe in [Typescript](https://www.typescriptlang.org/) und benutze die Laufzeit [Deno](https://deno.land/).
 
-`convertInput()` liest eine Textdatei ein und erstellt daraus die Liste aller Hotels. Die Umwandlug der besten Route in ein gut lesbares Format, das im Terminal ausgegeben werden kann, geschieht durch `convertOutput()`. Diese tragen aber nicht zur Bestimmung der besten Route bei, daher werde ich sie nicht behandeln.
+`convertInput()` liest eine Textdatei ein und erstellt daraus die Liste aller Hotels. Die Umwandlung der besten Route in ein gut lesbares Format, das im Terminal ausgegeben werden kann, geschieht durch `convertOutput()`. Sie tragen aber nicht zur Bestimmung der besten Route bei, daher werde ich sie nicht behandeln.
 
-`main.ts` enthält die Aufrufe der in `calculations.ts` geschriebenen Funktionen, die ich im Folgenden beschreibe.
+**Dateienstruktur**: `main.ts` enthält die Aufrufe der in `calculations.ts` geschriebenen Funktionen, die ich im Folgenden beschreibe.
 
 ### Herausfiltern irrelevanter Hotels
 
-Zuerst wird die Liste an Informationen zu jedem Hotel (&rarr; Typ [`hotelInformation`](###type%20hotelInformation) ) durch [`filterHotels()`](###filterHotels()) geschickt. Die Funktion gibt die gleiche Liste an Hotels zurück, jedoch ohne folgende:
+Zuerst wird die Liste an Informationen zu jedem Hotel (&rarr; Typ [`hotelInformation`](###type hotelInformation) ) durch [`filterHotels()`](###filterHotels()) geschickt. Die Funktion gibt die gleiche Liste an Hotels zurück, jedoch ohne folgende:
 
 - Hotels hinter dem Ziel (Z. 6)
 
@@ -68,20 +78,20 @@ Zuerst wird die Liste an Informationen zu jedem Hotel (&rarr; Typ [`hotelInform
 
 Das zweite Kriterium wäre für die Funktion des Programms nicht notwendig, jedoch trägt es zu einer Laufzeitverbesserung bei, da es weniger rechenaufwendig ist, die Hotels vorneweg herauszunehmen, als später die daraus entstehenden nicht optimalen Routen auszusortieren.
 
-### Kalkulation der besten Route
+### Bestimmung der besten Route
 
-Die gefilterte Liste an Hotels wird der Funktion [`bestRoute()`](###bestRoute()) weitergegeben. Dieser wird ein Element für das Ziel hinzugefügt, um später einen Ort zu haben, an dessen Anfahrtmöglichkeiten gespeichert werden können (Z. 5).
+Die gefilterte Liste an Hotels wird der Funktion [`bestRoute()`](###bestRoute()) weitergegeben. Dieser wird ein Element für das Ziel hinzugefügt, um einen Ort zu haben, an dem Anfahrtmöglichkeiten für das Ziel gespeichert werden können (Z. 5).
 
 #### Initialisierung der Tabelle
 
-Die in der Lösungsidee angesprochene dreidimensionale Liste setze ich leicht abgewandelt um, weil es praktisch ist, bei jeder Anfahrtmöglichkeit die limitierende Bewertung sofort griffbereit zu haben. Daher ist die Tabelle selbst nur zweidimensional, allerdings von Typ [`route`](###type%20route), der die Liste an Hotels enthält.
+Die in der Lösungsidee angesprochene dreidimensionale Liste setze ich leicht abgewandelt um, weil es praktisch ist, bei jeder Anfahrtmöglichkeit die limitierende Bewertung sofort griffbereit zu haben. Daher ist die Liste selbst nur zweidimensional, allerdings von Typ [`route`](###type route), der die Liste an Hotels enthält.
 
-Jeder Index der Liste wird mit einer leeren, *unabhängigen* Liste initialisiert (Z. 7 - 10). Allen Hotels, die vom Start erreichbar sind, wird eine Route ohne Zwischenstopps und bestmöglicher niedrigster Bewertung hinzugefügt, da es keine Hotels gibt, die die Bewertung limitieren (Z. 12 - 16).
+Jeder Index der Liste wird mit einer leeren Liste initialisiert (Z. 7 - 10). Allen Hotels, die vom Start erreichbar sind, wird eine Route ohne Zwischenstopps und bestmöglicher niedrigster Bewertung hinzugefügt, da es keine Hotels gibt, die die Bewertung limitieren (Z. 12 - 16).
 
 Es gibt also nun zwei Listen:
 
-- `hotels`: Bewertung + Minutenzahl aller Hotels &rarr; unveränderlich
-- `hotelsTable`: Anfahrtmöglichkeiten aller Hotels &rarr; initialisiert mit Startwerten
+- `hotels` enthält die Bewertung und Minutenzahl aller Hotels, sie wird nicht verändert.
+- `hotelsTable` wird schrittweise mit den Anfahrtmöglichkeiten jedes Hotels gefüllt werden, sie ist bereits mit Startwerten versehen worden.
 
 #### Iteration
 
@@ -97,15 +107,15 @@ Die zu den Anfahrtsmöglichkeiten des Zielhotels hinzuzufügende Route `newRoute
 
 #### Aktualisierung der Routen des Zielhotels
 
-Ob eine Ersetzung der Routen überhaubt in Betracht gezogen wird, hängt davon ab, ob das Ziel mit instgesamt maximal vier Hotels (&rarr; maximal fünf Reisetage) noch erreichbar ist (Z. 37 - 41).
+Ob eine Ersetzung der Routen überhaubt in Betracht gezogen wird, hängt davon ab, ob das Ziel mit insgesamt maximal vier Hotels (&rarr; maximal fünf Reisetage) noch erreichbar ist (Z. 37 - 41).
 
-Ist das der Fall, wird die Funktion [`substituteRoutes()`](###substituteRoutes()) aufgerufen, die dafür zuständig ist, falls schlechtere Routen beim Zielhotel vorhanden sind, diese herauszufiltern und *alle* durch die vorgeschlagene `newRoute` zu ersetzen. Zuerst wird geprüft, ob bereits eine bessere Route vorhanden ist, was nach den Kriterien *höhere niedrigste Bewertung* und *weniger Zwischenstopps* geschieht (Z. 6 - 12). Wenn eine bessere Alternative auftritt, wird nichts verändert, andernfalls wird die neue Route *sicherlich hinzugefügt* (Z. 20), weil sie entweder gleichwertig oder besser als die bisher beste ist. Davor werden aber alle schlechteren Routen (gleiche Kriterien wie zuvor) aus der Liste herausgenommen (Z. 13 - 18), damit mit ihnen keine weiteren Routen gebildet werden, die in jedem Fall eine bessere Alternative haben. &rarr; weniger Rechenaufwand
+Ist das der Fall, wird die Funktion [`substituteRoutes()`](###substituteRoutes()) aufgerufen, die dafür zuständig ist, falls schlechtere Routen beim Zielhotel vorhanden sind, diese herauszufiltern und *alle* durch die vorgeschlagene `newRoute` zu ersetzen. Zuerst wird geprüft, ob bereits eine bessere Route vorhanden ist, was nach den Kriterien *höhere niedrigste Bewertung* und *weniger Zwischenstopps* geschieht (Z. 6 - 12). Wenn eine bessere Alternative auftritt, wird nichts verändert, andernfalls wird die neue Route sicherlich hinzugefügt (Z. 20), weil sie entweder gleichwertig oder besser als die bisher beste ist. Davor werden aber alle schlechteren Routen (gleiche Kriterien wie oben) aus der Liste herausgenommen (Z. 13 - 18), damit mit ihnen keine weiteren Routen gebildet werden, die in jedem Fall eine bessere Alternative haben. Das reduziert den Rechenaufwand und Arbeitsspeicherbedarf.
 
 Das Zielhotel erhält schleißlich die aktualisierte Liste an Routen in [`bestRoute()`](###bestRoute()) (Z. 42 - 45).
 
 #### Rückgabe
 
-Die Funktion [`determineBest()`](###determineBest()) gibt die Route mit der besten niedrigsten Bewertung zurück, indem sie die Routen zuerst absteigend nach `lowestRating` sortiert und davon das erste Element nimmt. Sie wird auf die Liste an Routen zum Ziel (letztes Element in `hotelsTable`) angewendet, das Ergebnis ist die Rückgabe von [`bestRoute()`](###bestRoute()). 
+Die Funktion [`determineBest()`](###determineBest()) wird auf die Liste an Routen zum Ziel (letztes Element in `hotelsTable`) angewendet, das Ergebnis ist die Rückgabe von [`bestRoute()`](###bestRoute()) (Z. 49). Sie gibt die Route mit der besten niedrigsten Bewertung zurück, indem sie die Routen zum Ziel zuerst absteigend nach `lowestRating` sortiert und davon das erste Element nimmt. 
 
 &rarr; Ausgabe im Terminal nach Strukturierung durch `convertOutput()`
 
@@ -137,7 +147,7 @@ Minute 	|  Bewertung
 783		|  5
 ```
 
-Dieses Beispiel kann ich manuell überprüfen, da es sehr kurz ist, was beispielsweise bei [hotels3](###hotels3) schwierig ist.
+Dieses Beispiel kann ich manuell überprüfen, da es sehr kurz ist, was beispielsweise bei [hotels3](###hotels3) schwierig ist. Mit ihm kann ich feststellen, ob das Programm richtig arbeitet.
 
 ### hotels1
 
@@ -286,7 +296,7 @@ Minute 	|  Bewertung
 1440	|  4.8
 ```
 
-Hier handelt es sich um einen Extremfall, weil das Ziel $5 \cdot 360min = 1800min$ (maximal weit) entfernt und damit nur über genau eine Hotelkombination erreichbar ist. Diese w korrekt erkannt, da alle Zwischenstopps bei einem Vielfachen von $360$ liegen.
+Hier handelt es sich um einen Extremfall, weil das Ziel $5 \cdot 360min = 1800min$ (maximal weit) entfernt und damit nur über genau eine Hotelkombination erreichbar ist. Diese wird korrekt erkannt, da alle Zwischenstopps bei einem Vielfachen von $360$ liegen.
 
 ### hotels7
 

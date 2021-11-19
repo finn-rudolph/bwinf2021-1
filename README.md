@@ -21,3 +21,5 @@ deno run --allow-read marktwaage/main.ts
 ## Dokumentation
 
 Die Dokumentation ist ursprünglich in Markdown geschrieben. Da ich Grafiken zur Veranschaulichung meiner Lösungsideen habe ich mit [mermaid](https://mermaid-js.github.io/mermaid/#/) erstellt habe, werden diese beim Betrachten der Markdown-Quelldatein nicht gerendert angezeigt (in den PDFs schon).
+
+Die Zeilenangaben in Klammern beziehen sich immer auf die im entsprechenden Abschnitt behandelte Funktion, zu der ein Link am Anfang des Abschnitts angegeben wird.
